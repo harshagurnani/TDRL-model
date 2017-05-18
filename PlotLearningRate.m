@@ -27,8 +27,8 @@ firstTrials_model = zeros(plotLen,4);
 c=1;
 counter = zeros(1,4);
 for blockN = unique(data_mice(:,9))'
-   
    day_session = data_mice(data_mice(:,9)==blockN,11);
+   
    blockID = data_mice(data_mice(:,9)==blockN,8);
    
    % 'status' columns are as follows

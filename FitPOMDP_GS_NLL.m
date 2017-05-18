@@ -62,8 +62,11 @@ for iter = 1:iterN
       
       % add sensory noise
       contrast_withnoise  = currentContrast + noiseSTD * randn;
+      %---------------------- HG. Here we can have different sensory noise
+      % for left or right depending on sphere of stimulation?
       
       % define Belief for every possible contrast value
+      %---------------------- HG. Here we can have different conditional probabilities? 
       Belief = normpdf(contrast,contrast_withnoise,noiseSTD);
       Belief = Belief ./sum(Belief);            % normalise belief
       
@@ -113,7 +116,7 @@ for iter = 1:iterN
             
             if action(trials,iter)==-1
                
-               correct(trials,iter) = 1;
+               correct(trials,iter) = 1; %-------------------- correct = -1???
                Reward = reward(1,data(trials,8));
                
             elseif action(trials,iter)==1
@@ -170,9 +173,9 @@ c=1;
 for j=unique(data(:,8))'
    for i=contrast
       
-      nn(c) = length(data(data(:,2)==i & data(:,8)==j,2));
-      pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);
-      probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c);
+      nn(c) = length(data(data(:,2)==i & data(:,8)==j,2));                          % Total number of trials
+      pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);     % Observed P(R)
+      probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
       
       c=c+1;
 
@@ -185,7 +188,15 @@ for j=unique(data(:,8))'
 
 end
 
-
+% Note: HG. Assuming Binomial RV of Rightward(R) Actions at each
+% contrast(per block) 'c', Probability is given as:
+% P(c) = choose(nn,k) * probs^(k) * (1-probs)^(nn-k)       
+%           where  pp(c) = k(c)/nn(c)   or k is the number of R actions for contrast c  
+% Total probability is  product of these probabilities for all contrasts.
+% NLL = - Sum(log(P(c))
+% - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
+%           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
+% Constant K is constant for all simulations so only need to maximise second term 
 NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)));
 
 

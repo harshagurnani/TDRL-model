@@ -21,7 +21,7 @@ noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 % noiseSTD    = 0.03 : 0.2 : 0.43;    % noise in belief
 
 % load in animal data
-AnimalID='SS040'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK017'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 
 ExpID = '1';

@@ -9,11 +9,11 @@ data_model(:,22) = (1 + data_model(:,22)) ./ 2;
 
 
 plotLen = length(data_mice);
-if length(data_mice)<plotLen
-   
-   plotLen = length(data_mice);
-   
-end
+% if length(data_mice)<plotLen
+%    
+%    plotLen = length(data_mice);
+%    
+% end
 plotLenVec = cat(1,ones(plotLen,1),zeros(length(data_mice)-plotLen,1));
 
 mouse = data_mice(plotLenVec==1,3) ;
