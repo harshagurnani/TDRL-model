@@ -24,7 +24,7 @@ contrastNum = length(contrast);
 
 % set run numbers
 % set iterN to an odd number
-iterN = 1;                    
+iterN = 24;                    
 trialN = length(contrastTrials);
 
 
@@ -35,7 +35,7 @@ QR = nan (trialN,iterN);
 %choiceP = nan (trialN);
 correct = nan(trialN,iterN);
 
-for iter = 1:iterN
+parfor iter = 1:iterN
    
    % initalise Q values for each iteration
    QLL(1,:) = 1;
@@ -165,9 +165,13 @@ end
 modeAction = mode(action,2);
 
 xx = contrast;
-nn = nan(length(xx),1);
-pp = nan(length(xx),1);
-probs = nan(length(xx),1);
+nn = nan(length(xx)*length(unique(data(:,8))),1);
+pp = nn;
+probs = nn;
+
+nn_L=nn;        nn_R=nn;
+pp_L=nn;        pp_R=nn;
+probs_L=nn;     probs_R=nn;
 
 c=1;
 for j=unique(data(:,8))'
@@ -177,6 +181,17 @@ for j=unique(data(:,8))'
       pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);     % Observed P(R)
       probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
       
+      %Trials after left choices
+      nn_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1,2));      
+      pp_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1,2))/nn_L(c);            % Observed P(R)
+      model_nn_L= length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(1:end-1)==-1,2));
+      probs_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(2:end)==1  & modeAction(1:end-1)==-1,2))/model_nn_L; % Estimated P(R) 
+      
+      %Trials after right choices
+      nn_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==1,2));      
+      pp_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==1,2))/nn_R(c);            % Observed P(R)
+      model_nn_R= length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(1:end-1)==1,2));
+      probs_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(2:end)==1  & modeAction(1:end-1)==1,2))/model_nn_R; % Estimated P(R) 
       c=c+1;
 
    end
@@ -185,6 +200,11 @@ for j=unique(data(:,8))'
    probs(probs==0)=eps;
    probs(probs==1)=1-eps;
    
+   probs_L(probs_L==0)=eps;
+   probs_L(probs_L==1)=1-eps;
+   
+   probs_R(probs_R==0)=eps;
+   probs_R(probs_R==1)=1-eps;
 
 end
 
@@ -197,7 +217,7 @@ end
 % - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
 %           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
 % Constant K is constant for all simulations so only need to maximise second term 
-NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)));
+NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)))  - sum(nn_L.*(pp_L.*log(probs_L)+(1-pp_L).*log(1-probs_L)))  - sum(nn_R.*(pp_R.*log(probs_R)+(1-pp_R).*log(1-probs_R)));
 
 
 end

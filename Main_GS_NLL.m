@@ -11,9 +11,9 @@ close all
 % noiseSTD    = 0.01 : 0.04 : 0.91;    % noise in belief
 
 % TESTING2 set model parameter values
-alpha       = 0.0 : 0.03 : 0.7;      % learning rate
-DA_val      = 0.0 : 0.3 : 8.0;      % dopamine value
-noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
+alpha       = 0.0 : 0.1 : 0.7;      % learning rate
+DA_val      = 0.0 : 1 : 8.0;      % dopamine value
+noiseSTD    = 0.02 : 0.1 : 0.42;    % noise in belief
 
 % TESTING set model parameter values
 % alpha       = 0.0 : 0.5 : 1.0;      % learning rate
@@ -125,7 +125,7 @@ for k=1:length(noiseSTD)
          params(2) = DA_val(j);
          params(3) = noiseSTD(k);
          counter = counter + 1;
-         Fval = FitPOMDP_GS_NLL(params, Data);
+         Fval = FitPOMDP_GS_NLL_New(params, Data);
          xanswerStore(counter,:) = params;
          FvalStore(i,j,k) = Fval;
       end

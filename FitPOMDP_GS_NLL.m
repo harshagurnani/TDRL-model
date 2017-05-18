@@ -165,9 +165,9 @@ end
 modeAction = mode(action,2);
 
 xx = contrast;
-nn = nan(length(xx),1);
-pp = nan(length(xx),1);
-probs = nan(length(xx),1);
+nn = nan(length(xx)*length(unique(data(:,8))),1);
+pp = nn;
+probs = nn;
 
 c=1;
 for j=unique(data(:,8))'
