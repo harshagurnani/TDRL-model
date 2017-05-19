@@ -1,5 +1,5 @@
 
-function NLL = FitPOMDP_GS_NLL_New(params,Data)
+function [NLL, NLL_L, NLL_R] = FitPOMDP_GS_NLL_New(params,Data, varargin)
 
 data = Data.data;
 
@@ -24,7 +24,10 @@ contrastNum = length(contrast);
 
 % set run numbers
 % set iterN to an odd number
-iterN = 24;                    
+iterN = 1;%24;                    
+if nargin>2
+    iterN = varargin{1};
+end
 trialN = length(contrastTrials);
 
 
@@ -77,6 +80,8 @@ parfor iter = 1:iterN
       Belief_R=sum(Belief(floor(contrastNum/2)+1:end));
       
       %initialise Q values for this iteration
+      %------------------ HG. We can introduce uncertainty/corruption of
+      % stored Q-values
       QL(trials,iter) = Belief_L*QLL + Belief_R*QRL;
       QR(trials,iter) = Belief_L*QLR + Belief_R*QRR;
       
@@ -177,21 +182,34 @@ c=1;
 for j=unique(data(:,8))'
    for i=contrast
       
+      
       nn(c) = length(data(data(:,2)==i & data(:,8)==j,2));                          % Total number of trials
       pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);     % Observed P(R)
       probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
       
-      %Trials after left choices
-      nn_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1,2));      
-      pp_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1,2))/nn_L(c);            % Observed P(R)
-      model_nn_L= length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(1:end-1)==-1,2));
-      probs_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(2:end)==1  & modeAction(1:end-1)==-1,2))/model_nn_L; % Estimated P(R) 
+      %Trials after correct left choices
+      nn_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1 &  data(1:end-1,10)==1,   2));      
+      pp_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1  & data(1:end-1,10)==1,   2))/nn_L(c);            % Observed P(R)
+      probs_L(c)=0;
+      for iter = 1:iterN
+        model_nn_L= length(data(data(2:end,2)==i & data(2:end,8)==j & action(1:end-1,iter)==-1,2));
+        probs_L(c) = probs_L(c) ...
+                        + length(data(data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==-1  & correct(1:end-1,iter)==1,2))/model_nn_L; % Estimated P(R) 
+      end
+      probs_L(c) = probs_L(c)/iterN;        % Average across iterations
       
-      %Trials after right choices
-      nn_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==1,2));      
-      pp_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==1,2))/nn_R(c);            % Observed P(R)
-      model_nn_R= length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(1:end-1)==1,2));
-      probs_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & modeAction(2:end)==1  & modeAction(1:end-1)==1,2))/model_nn_R; % Estimated P(R) 
+      
+      %Trials after correct left choices
+      nn_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1 &  data(1:end-1,10)==1,   2));      
+      pp_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1  & data(1:end-1,10)==1,   2))/nn_L(c);            % Observed P(R)
+      probs_R(c)=0;
+      for iter = 1:iterN
+        model_nn_R= length(data(data(2:end,2)==i & data(2:end,8)==j & action(1:end-1,iter)==1,2));
+        probs_R(c) = probs_R(c) ...
+                        + length(data(data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==1  & correct(1:end-1,iter)==1,2))/model_nn_R; % Estimated P(R) 
+      end
+      probs_R(c) = probs_R(c)/iterN;        % Average across iterations
+      
       c=c+1;
 
    end
@@ -217,8 +235,10 @@ end
 % - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
 %           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
 % Constant K is constant for all simulations so only need to maximise second term 
-NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)))  - sum(nn_L.*(pp_L.*log(probs_L)+(1-pp_L).*log(1-probs_L)))  - sum(nn_R.*(pp_R.*log(probs_R)+(1-pp_R).*log(1-probs_R)));
+NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)));
+NLL_L = - sum(nn_L.*(pp_L.*log(probs_L)+(1-pp_L).*log(1-probs_L)));
+NLL_R = - sum(nn_R.*(pp_R.*log(probs_R)+(1-pp_R).*log(1-probs_R)));
 
-
+% NLL=NLL+NLL_L+NLL_R;
 end
 
