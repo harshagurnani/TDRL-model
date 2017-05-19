@@ -4,7 +4,7 @@ color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
 
 % changing y-axis values
 data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
-data_model(:,16) = (1 + data_model(:,16)) ./ 2;
+data_model(:,22) = (1 + data_model(:,22)) ./ 2;
 
 
 xx = unique(data_mice(:,2))';
@@ -26,7 +26,7 @@ for blockID = unique(data_mice(:,8))'
       per_mice(c)= nanmean(data_mice(data_mice(:,2)==istim & ...
          data_mice(:,8)==blockID,3)) ;
       per_model(c)= nanmean(data_model(data_model(:,2)==istim & ...
-         data_model(:,8)==blockID,16)) ;
+         data_model(:,8)==blockID,22)) ;
       
       nn(c) = length(data_mice(data_mice(:,2)==istim & ...
          data_mice(:,8)==blockID,2));
