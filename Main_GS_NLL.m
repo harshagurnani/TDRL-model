@@ -11,9 +11,9 @@ close all
 % noiseSTD    = 0.01 : 0.04 : 0.91;    % noise in belief
 
 % TESTING2 set model parameter values
-alpha       = 0.0 : 0.1 : 0.7;      % learning rate
-DA_val      = 0.0 : 1 : 8.0;      % dopamine value
-noiseSTD    = 0.02 : 0.1 : 0.42;    % noise in belief
+alpha       = 0.0 : 0.03 : 0.7;      % learning rate
+DA_val      = 0.0 : 0.3 : 8.0;      % dopamine value
+noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 
 % TESTING set model parameter values
 % alpha       = 0.0 : 0.5 : 1.0;      % learning rate
@@ -112,7 +112,8 @@ Nruns = length(alpha)*length(DA_val)*length(noiseSTD);
 params = nan(3,1);
 xanswerStore = nan(Nruns,3);
 FvalStore = nan(length(alpha),length(DA_val),length(noiseSTD));
-
+FvalStore_L = FvalStore;
+FvalStore_R = FvalStore;
 
 % Run over parameter values
 counter = 0;
@@ -125,9 +126,11 @@ for k=1:length(noiseSTD)
          params(2) = DA_val(j);
          params(3) = noiseSTD(k);
          counter = counter + 1;
-         Fval = FitPOMDP_GS_NLL_New(params, Data);
+         [Fval, Fval_l, Fval_r] = FitPOMDP_GS_NLL_New(params, Data);
          xanswerStore(counter,:) = params;
          FvalStore(i,j,k) = Fval;
+         FvalStore_L(i,j,k) = Fval_l;
+         FvalStore_R(i,j,k) = Fval_r;
       end
    end
 end
@@ -164,8 +167,11 @@ set(0,'DefaultAxesPosition',[0.05,0.05,0.94,0.94])
 % FIX ME these plots need titles and labels
 PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore)
 
+PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore_L)
+PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore_R)
+PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore_R+FvalStore_L)
 
-% 3BEST 3WORST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 3BEST 3WORST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % find the 3 best and 3 worst sets of parameters
 [xanswerMin, ~] = Find3BestWorst(FvalStore,xanswerStore);
@@ -181,7 +187,7 @@ for i=1:3
 end
 
 
-% Plot3BestWorst(Data,data_modelMin,data_modelMax);
+%% Plot3BestWorst(Data,data_modelMin,data_modelMax);
 
 
 % PLOT TRIALS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

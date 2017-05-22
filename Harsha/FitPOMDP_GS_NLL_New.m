@@ -188,25 +188,31 @@ for j=unique(data(:,8))'
       probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
       
       %Trials after correct left choices
-      nn_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1 &  data(1:end-1,10)==1,   2));      
-      pp_L(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1  & data(1:end-1,10)==1,   2))/nn_L(c);            % Observed P(R)
+      id = [false; data(2:end,2)==i & data(2:end,8)==j                    & data(1:end-1,3)==-1  &  data(1:end-1,10)==1];
+      nn_L(c) = sum(id); 
+      id = [false;data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1  & data(1:end-1,10)==1];
+      pp_L(c) = sum(id)/nn_L(c);            % Observed P(R)
       probs_L(c)=0;
       for iter = 1:iterN
-        model_nn_L= length(data(data(2:end,2)==i & data(2:end,8)==j & action(1:end-1,iter)==-1,2));
-        probs_L(c) = probs_L(c) ...
-                        + length(data(data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==-1  & correct(1:end-1,iter)==1,2))/model_nn_L; % Estimated P(R) 
+        id = [false;data(2:end,2)==i & data(2:end,8)==j                           & action(1:end-1,iter)==-1  & correct(1:end-1,iter)==1];
+        model_nn_L= sum(id);
+        id = [false;data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==-1  & correct(1:end-1,iter)==1];
+        probs_L(c) = probs_L(c) + sum(id)/model_nn_L; % Estimated P(R) 
       end
       probs_L(c) = probs_L(c)/iterN;        % Average across iterations
       
       
-      %Trials after correct left choices
-      nn_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j  &  data(1:end-1,3)==-1 &  data(1:end-1,10)==1,   2));      
-      pp_R(c) = length(data(data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==-1  & data(1:end-1,10)==1,   2))/nn_L(c);            % Observed P(R)
+      %Trials after correct right choices
+      id = [false;data(2:end,2)==i & data(2:end,8)==j                     & data(1:end-1,3)==1  & data(1:end-1,10)==1];
+      nn_R(c) = sum(id);
+      id = [false;data(2:end,2)==i & data(2:end,8)==j & data(2:end,3)==1  & data(1:end-1,3)==1  & data(1:end-1,10)==1];
+      pp_R(c) = sum(id)/nn_R(c);            % Observed P(R)
       probs_R(c)=0;
       for iter = 1:iterN
-        model_nn_R= length(data(data(2:end,2)==i & data(2:end,8)==j & action(1:end-1,iter)==1,2));
-        probs_R(c) = probs_R(c) ...
-                        + length(data(data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==1  & correct(1:end-1,iter)==1,2))/model_nn_R; % Estimated P(R) 
+        id = [false;data(2:end,2)==i & data(2:end,8)==j                           & action(1:end-1,iter)==1  & correct(1:end-1,iter)==1];
+        model_nn_R= sum(id);
+        id = [false;data(2:end,2)==i & data(2:end,8)==j & action(2:end, iter)==1  & action(1:end-1,iter)==1  & correct(1:end-1,iter)==1];
+        probs_R(c) = probs_R(c) +sum(id)/model_nn_R; % Estimated P(R) 
       end
       probs_R(c) = probs_R(c)/iterN;        % Average across iterations
       
