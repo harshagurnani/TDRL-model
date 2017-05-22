@@ -126,7 +126,7 @@ for k=1:length(noiseSTD)
          params(2) = DA_val(j);
          params(3) = noiseSTD(k);
          counter = counter + 1;
-         [Fval, Fval_l, Fval_r] = FitPOMDP_GS_NLL_New(params, Data);
+         [Fval, Fval_l, Fval_r,~,~] = FitPOMDP_GS_NLL_New(params, Data);
          xanswerStore(counter,:) = params;
          FvalStore(i,j,k) = Fval;
          FvalStore_L(i,j,k) = Fval_l;
@@ -256,10 +256,8 @@ PlotMiceRLAndErf_GS(data,data_model)
 [~, locMin1] = min(FvalStore(:));
 xanswerBest = xanswerStore(locMin1,:);
 
-[data_modelBest, action, correct] = RunPOMDP_GS_NLL(Data, [xanswerBest(1),...
+[data_modelBest] = RunPOMDP_GS_NLL(Data, [xanswerBest(1),...
    xanswerBest(2),xanswerBest(3)]);
 
 AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
 
-%% Cond PC
-PlotCondPC_Mice_Model(Data.data, data_modelBest, action, correct)

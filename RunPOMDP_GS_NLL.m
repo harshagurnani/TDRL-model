@@ -1,5 +1,5 @@
 
-function [data_model] = RunPOMDP_GS_NLL(Data,params)
+function [data_model, action, correct] = RunPOMDP_GS_NLL(Data,params)
 
 data = Data.data;
 
@@ -31,6 +31,7 @@ contrastNum = length(contrast);
 
 % initialise variables, for speed
 action = nan(trialN,iterN);
+correct = zeros(trialN,iterN);
 QL = nan (trialN,iterN);
 QR = nan (trialN,iterN);
 
@@ -115,15 +116,15 @@ parfor iter = 1:iterN
       if currentContrast<0 && action(trials,iter)==-1
          
          Reward = reward(1,data(trials,8));
-         
+         correct(trials,iter)=1;
       elseif currentContrast>0 && action(trials,iter)==1
          
          Reward = reward(2,data(trials,8));
-         
+         correct(trials,iter)=1;
       elseif currentContrast==0
          
          if rand > 0.5
-            
+            correct(trials,iter)=1;
             if action(trials,iter)==-1
                
                Reward = reward(1,data(trials,8));
