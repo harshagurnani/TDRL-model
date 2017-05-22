@@ -11,7 +11,7 @@ close all
 % noiseSTD    = 0.01 : 0.04 : 0.91;    % noise in belief
 
 % TESTING2 set model parameter values
-alpha       = 0.0 : 0.1 : 0.7;       % learning rate
+alpha       = 0.0 : 0.1 : 1;       % learning rate
 DA_val      = 0.0 : 0.3 : 8.0;       % dopamine value
 noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 
@@ -21,7 +21,7 @@ noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 % noiseSTD    = 0.03 : 0.2 : 0.43;    % noise in belief
 
 % load in animal data
-AnimalID='ALK028'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='SS031_DA'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 
 ExpID = '1';
@@ -150,9 +150,9 @@ PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore)
 
 %% Run again to get conditional psychometric curves fitted
 
-alpha_new       = 0.03 : 0.03 : 0.7;       % learning rate
-DA_val_new      = xanswerMin(:,2);      % dopamine value
-noiseSTD_new    = xanswerMin(:,3);      % noise in belief
+alpha_new       = 0.03 : 0.03 : 1.2;       % learning rate
+DA_val_new      = sort(xanswerMin(:,2));      % dopamine value
+noiseSTD_new    = sort(xanswerMin(:,3));      % noise in belief
 
 % Initialise
 Nruns2 = length(alpha_new)*length(DA_val_new)*length(noiseSTD_new);
@@ -213,21 +213,21 @@ end
 % PLOT TRIALS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data_model = zeros(size(data_modelMin,2),size(data_modelMin,3));
-[data_modelMin(i,:,:)] = RunPOMDP_GS_NLL(Data, xanswerMin2(i,:));
+% [data_modelMin(i,:,:)] = RunPOMDP_GS_NLL(Data, xanswerMin2(i,:));
 
 % PlotTrials(Data,data_model)
-PlotTrialsTogether(Data,data_model)
+% PlotTrialsTogether(Data,data_model)
 
 
 % LEARNING RATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-PlotLearningRate(Data,data_model)
+% PlotLearningRate(Data,data_model)
 % PlotLearningRateReactTime(Data,data_model)
 
 
 % MICE AND MODEL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-PlotMiceRLAndErf_GS(data,data_model)
+% PlotMiceRLAndErf_GS(data,data_model)
 
 
 % PLOT INFO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -253,8 +253,9 @@ PlotMiceRLAndErf_GS(data,data_model)
 %%% ALL THE PLOTS
 
 
-[~, locMin1] = min(FvalStore(:));
-xanswerBest = xanswerStore(locMin1,:);
+% [~, locMin1] = min(FvalStore(:));
+% xanswerBest = xanswerStore(locMin1,:);
+xanswerBest = xanswerMin2(1,:);
 
 [data_modelBest, action, correct] = RunPOMDP_GS_NLL(Data, [xanswerBest(1),...
    xanswerBest(2),xanswerBest(3)]);
