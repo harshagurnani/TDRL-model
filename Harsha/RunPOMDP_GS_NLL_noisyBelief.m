@@ -1,4 +1,4 @@
-function [data_model] = RunPOMDP_GS_NLL_noisyBelief(Data,params)
+function [data_model, action, correct] = RunPOMDP_GS_NLL_noisyBelief(Data,params)
 %% Run model where conditional probability of belief has higher variance for left(or right) internal contrast representation
 
 data = Data.data;

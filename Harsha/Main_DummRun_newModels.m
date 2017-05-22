@@ -1,15 +1,15 @@
 alpha =     0.4;
-DA_val =    2;
+DA_val =    0;
 noiseSTD = 0.3;
 
-shiftBF = 0.25;
-noiseL = noiseSTD*2;
+shiftBF = [0 0.05 0.1 0.15 0.2 0.3 0.4];
+noiseL = noiseSTD*[0.5 0.75 1 1.2 1.5 1.8 2];
 noiseR = noiseSTD*1;
 
-AnimalID='ALK027'; 
-ExpID = '22';
+AnimalID='ALK022'; 
+ExpID = '1';
 
-data = LoadSavedDataForBehExp(AnimalID, ExpID);
+% data = LoadSavedDataForBehExp(AnimalID, ExpID);
 
 data(data(:,8)==3,:)=[];
 data(data(:,8)==4,:)=[];
@@ -64,20 +64,32 @@ Data.ID=AnimalID;
 %% Run model for fitted parameters
 
 % initialise data
-data_modelMin = zeros(2,length(data),22);
+data_model = zeros(14,length(data),22);
 
 
-params_shift = [alpha, DA_val, noiseSTD, shiftBF];
-params_noisy = [alpha, DA_val, noiseSTD, noiseL, noiseR ];
 
 % run the model
- data_modelMin(1,:,:) = RunPOMDP_GS_NLL_shiftBelief(Data, params_shift);
- data_modelMin(2,:,:) = RunPOMDP_GS_NLL_shiftBelief(Data, params_noisy);
+nparams=7;
+for jj=1:nparams
+    
+ params_shift = [alpha, DA_val, noiseSTD, shiftBF(jj)]; 
+ params_noisy = [alpha, DA_val, noiseSTD, noiseL(jj), noiseR ];
+ data_model(jj,:,:) = RunPOMDP_GS_NLL_shiftBelief(Data, params_shift);
+ data_model(nparams+jj,:,:) = RunPOMDP_GS_NLL_shiftBelief(Data, params_noisy);
  
+end
+
+data1= data; data2=data;
+data1(:,3) = data_model(1,:,22);
+data2(:,3) = data_model(10,:,22);
  %% Plotting
  
+ for jj=1:nparams
+     PlotMiceRLAndErf_GS(data1,squeeze(data_model(jj,:,:)))
+ end
  
-
  
-PlotMiceRLAndErf_GS(data,squeeze(data_modelMin(1,:,:)))
-PlotMiceRLAndErf_GS(data,squeeze(data_modelMin(2,:,:)))
+ for jj=1:nparams
+     PlotMiceRLAndErf_GS(data2,squeeze(data_model(nparams+jj,:,:)))
+ end
+ 
