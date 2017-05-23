@@ -21,12 +21,12 @@ noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 % noiseSTD    = 0.03 : 0.2 : 0.43;    % noise in belief
 
 % load in animal data
-AnimalID='SS031_DA'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK028'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 
 ExpID = '1';
 
-data = LoadSavedDataForBehExp (AnimalID, ExpID);
+% data = LoadSavedDataForBehExp (AnimalID, ExpID);
 
 % blockIDs 1 & 2 represent asymmetric dopamine reward
 % remove blockIDs 3 & 4
@@ -162,7 +162,7 @@ FvalStore2 = nan(length(alpha_new),length(DA_val_new),length(noiseSTD_new));
 FvalStore2_L = FvalStore2;
 FvalStore2_R = FvalStore2;
 
-iterN = 20;     %No. of iterations
+iterN = 50;     %No. of iterations
 % Run over parameter values
 counter = 0;
 for k=1:length(noiseSTD_new)
@@ -185,14 +185,14 @@ end
 
 %% New plots
 
-PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2)
-PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_L)
-PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_R)
+PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2, 'NLL of Block-wise psychometric curves')
+PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_L, 'NLL of Fraction Right-Choices after Correct Left choices')
+PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_R, 'NLL of Fraction Right-Choices after Correct Right choices')
 
 %% 3BEST 
 
 % find the 3 best sets of parameters
-[xanswerMin2, ~] = Find3BestWorst(FvalStore2,xanswerStore2);
+[xanswerMin2, ~] = Find3BestWorst(FvalStore2_L+FvalStore2_R,xanswerStore2);
 
 %% Run model for fitted parameters
 
@@ -257,10 +257,14 @@ data_model = zeros(size(data_modelMin,2),size(data_modelMin,3));
 % xanswerBest = xanswerStore(locMin1,:);
 xanswerBest = xanswerMin2(1,:);
 
-[data_modelBest, action, correct] = RunPOMDP_GS_NLL(Data, [xanswerBest(1),...
+[data_modelBest, action, correct, QL,QR] = RunPOMDP_GS_NLL_returnDetails(Data, [xanswerBest(1),...
    xanswerBest(2),xanswerBest(3)]);
 
+%%
 AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
 
 %% Cond PC
 PlotCondPC_Mice_Model(Data.data, data_modelBest, action, correct)
+
+%% Plot Q-Values
+PlotQValues( data_modelBest, action, correct, QL, QR)

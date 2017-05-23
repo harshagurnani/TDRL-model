@@ -1,4 +1,4 @@
-function PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore)
+function PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore, varargin)
 % function to plot a colour map of goodness of fit determined by
 % FvalStoreAlt
 
@@ -27,6 +27,9 @@ end
 
 % Plot the colour map
 figure('position',[100,100,1200,400]);
+if nargin>4
+    suptitle(varargin{1})
+end
 subplot(1,3,1);
 imagesc(x,y,colourVal);
 colorbar
