@@ -1,5 +1,4 @@
-
-function [NLL, NLL_L, NLL_R] = FitPOMDP_GS_NLL_CompleteData(params,Data, varargin)
+function [NLL, NLL_L, NLL_R] = FitPOMDP_GS_NLL_CompleteData(params,Data, includeContrast, varargin)
 
 data = Data.data;
 
@@ -22,10 +21,13 @@ contrast = unique(data(:,2))';
 contrastNum = length(contrast);
 
 
+
+
+%% initialise
 % set run numbers
 % set iterN to an odd number
 iterN = 1;%24;                    
-if nargin>2
+if nargin>3
     iterN = varargin{1};
 end
 trialN = length(contrastTrials);
@@ -231,7 +233,7 @@ for j=unique(data(:,8))'
    probs_R(probs_R==1)=1-eps;
 
 end
-
+contrastToUse = (includeContrast==1);
 % Note: HG. Assuming Binomial RV of Rightward(R) Actions at each
 % contrast(per block) 'c', Probability is given as:
 % P(c) = choose(nn,k) * probs^(k) * (1-probs)^(nn-k)       
@@ -241,10 +243,9 @@ end
 % - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
 %           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
 % Constant K is constant for all simulations so only need to maximise second term 
-NLL = - sum(nn.*(pp.*log(probs)+(1-pp).*log(1-probs)));
-NLL_L = - sum(nn_L.*(pp_L.*log(probs_L)+(1-pp_L).*log(1-probs_L)));
-NLL_R = - sum(nn_R.*(pp_R.*log(probs_R)+(1-pp_R).*log(1-probs_R)));
+NLL = - sum(nn(contrastToUse).*(pp(contrastToUse).*log(probs(contrastToUse))+(1-pp(contrastToUse)).*log(1-probs(contrastToUse))));
+NLL_L = - sum(nn_L(contrastToUse).*(pp_L(contrastToUse).*log(probs_L(contrastToUse))+(1-pp_L(contrastToUse)).*log(1-probs_L(contrastToUse))));
+NLL_R = - sum(nn_R(contrastToUse).*(pp_R(contrastToUse).*log(probs_R(contrastToUse))+(1-pp_R(contrastToUse)).*log(1-probs_R(contrastToUse))));
 
-% NLL=NLL+NLL_L+NLL_R;
 end
 

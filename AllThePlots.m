@@ -107,28 +107,28 @@ end
 subplot(3,2,2);
 set(gca,'visible','off');
 
-descr1 = {['Animal ID:  ',animalID];
-  ['Median trials per constrast: ',num2str(median(trialsPerContrast))];
-   ['Number of contrast levels: ',num2str(length(trialsPerContrast))];};
-text(0,0.9,descr1)
-
-descr2 = {'Model parameter values:';
-    ['alpha = ',num2str(xanswerMin(1))];
-   ['DAval = ',num2str(xanswerMin(2))];
-   ['noiseSTD = ',num2str(xanswerMin(3))];};
-text(.55,0.9,descr2)
-
-descr3 = {'erf left parameter values:';
-    ['threshold = ',num2str(psychoParams_L(1))];
-   ['slope = ',num2str(psychoParams_L(2))];
-   ['gamma = ',num2str(psychoParams_L(3))];};
-text(0,0.2,descr3)
-
-descr4 = {'erf right parameter values:';
-    ['threshold = ',num2str(psychoParams_R(1))];
-   ['slope = ',num2str(psychoParams_R(2))];
-   ['gamma = ',num2str(psychoParams_R(3))];};
-text(.55,0.2,descr4)
+% descr1 = {['Animal ID:  ',animalID];
+%   ['Median trials per constrast: ',num2str(median(trialsPerContrast))];
+%    ['Number of contrast levels: ',num2str(length(trialsPerContrast))];};
+% text(0,0.9,descr1)
+% 
+% descr2 = {'Model parameter values:';
+%     ['alpha = ',num2str(xanswerMin(1))];
+%    ['DAval = ',num2str(xanswerMin(2))];
+%    ['noiseSTD = ',num2str(xanswerMin(3))];};
+% text(.55,0.9,descr2)
+% 
+% descr3 = {'erf left parameter values:';
+%     ['threshold = ',num2str(psychoParams_L(1))];
+%    ['slope = ',num2str(psychoParams_L(2))];
+%    ['gamma = ',num2str(psychoParams_L(3))];};
+% text(0,0.2,descr3)
+% 
+% descr4 = {'erf right parameter values:';
+%     ['threshold = ',num2str(psychoParams_R(1))];
+%    ['slope = ',num2str(psychoParams_R(2))];
+%    ['gamma = ',num2str(psychoParams_R(3))];};
+% text(.55,0.2,descr4)
 
 %% PLOT 2
 

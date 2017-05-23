@@ -1,4 +1,4 @@
-function PlotCondPC_Mice_Model(data_mice, data_model, action, correct)
+function PlotCondPC_Mice_Model(data_mice, data_model, action, correct, varargin)
 
 color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
 
@@ -15,11 +15,18 @@ pp = nan(2,length(xx));
 per_mice = nan(2,length(unique(data_mice(:,2))));
 per_model = nan(2,length(unique(data_model(:,2))));
 
+contrasts = unique(data_mice(:,2))';
 
-
+if nargin >4
+    includeContrast = varargin{1}; 
+else
+    includeContrast = ones(length(contrasts)*length(unique(data_mice(:,8))),1);
+end
 
 niters = size(action,2);
+b=0;
 for blockID = unique(data_mice(:,8))'
+    b=b+1;
    c=1;
    for istim = unique(data_mice(:,2))'
       
@@ -56,18 +63,18 @@ for blockID = unique(data_mice(:,8))'
 %    
 %    [~, V] = binostat(1,pp);  % variance of binomial distribution
    
-   
+   plot_contrast = includeContrast((1:length(contrasts))+ (b-1)*length(contrasts) )==1;
    % PLOT
    % plot the mice raw data as points
    fig(blockID) = figure('Position', [100, 100, 550, 450]);
    ax(blockID) = axes(fig(blockID),'position',[0.09,0.1,0.86,0.88],'FontSize',16); hold on
    suptitle(sprintf('Psychomeric curve conditional to previous correct choice for Block %d', blockID))
-   plot(ax(blockID),unique(data_mice(:,2))',per_mice(1,:),...
+   plot(ax(blockID),contrasts(plot_contrast),per_mice(1,plot_contrast),...
       'color',color(blockID,:),...
       'marker','o','markersize',10,'markeredgecolor','b',...
       'markerfacecolor','b','linestyle','none',...
       'linewidth',1.2);
-   plot(ax(blockID),unique(data_mice(:,2))',per_mice(2,:),...
+   plot(ax(blockID),contrasts(plot_contrast),per_mice(2,plot_contrast),...
       'color',color(blockID,:),...
       'marker','o','markersize',10,'markeredgecolor','r',...
       'markerfacecolor','r','linestyle','none',...
@@ -84,10 +91,10 @@ for blockID = unique(data_mice(:,8))'
 %       'color',color(blockID,:),'linestyle','-','linewidth',1.2);
    
    % plot the model
-   plot(ax(blockID),unique(data_model(:,2))',per_model(1,:),'color','b',...
+   plot(ax(blockID),contrasts(plot_contrast),per_model(1,plot_contrast),'color','b',...
       'marker','o','markersize',10,'markeredgecolor','b',...
       'linestyle','--','linewidth',1.2);
-   plot(ax(blockID),unique(data_model(:,2))',per_model(2,:),'color','r',...
+   plot(ax(blockID),contrasts(plot_contrast),per_model(2,plot_contrast),'color','r',...
       'marker','o','markersize',10,'markeredgecolor','r',...
       'linestyle','--','linewidth',1.2);
 

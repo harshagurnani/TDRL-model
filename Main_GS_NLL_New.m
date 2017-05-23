@@ -51,31 +51,50 @@ end
 % if the number of trials for a contrast value is less than 5% then remove
 % this contrast value from the data set
 
-data_copy = data;   % I am doing it this way because otherwise inside the loop the length of data becomes smaller, Armin 3/4/2017
-for i=1:length(contrast)
-   
-   if trialsPerContrast(i) < 0.05*length(data_copy)
-      
-      data(data(:,2)==contrast(i),:)=[];
-      
-   end
-   
-end
+% data_copy = data;   % I am doing it this way because otherwise inside the loop the length of data becomes smaller, Armin 3/4/2017
+% for i=1:length(contrast)
+%    
+%    if trialsPerContrast(i) < 0.05*length(data_copy)
+%       
+%       data(data(:,2)==contrast(i),:)=[];
+%       
+%    end
+%    
+% end
+% 
+% 
+% 
+% % refdefine trailsPerContrast with updated totals
+% contrast = unique(data(:,2))';
+% trialsPerContrast = nan(length(contrast),1);
+% c=1;
+% for i=contrast
+%    
+%    trialsPerContrast(c) = length(data(data(:,2)==i,2));
+%    
+%    c=c+1;
+%    
+% end
+
+%% check contrasts with insufficient number of trials (<2.5% of block trials)
+% check number of trials for each contrast
+
+trialsPerContrast = nan(length(contrast)*length(unique(data(:,8))),1);
+includeContrast = ones(size(trialsPerContrast));
 
 
-
-% refdefine trailsPerContrast with updated totals
-contrast = unique(data(:,2))';
-trialsPerContrast = nan(length(contrast),1);
 c=1;
-for i=contrast
+for b=unique(data(:,8))'   
+   for i=contrast
+   trialsPerContrast(c) = length(data(data(:,2)==i & data(:,8)==b,2));
    
-   trialsPerContrast(c) = length(data(data(:,2)==i,2));
    
+   if trialsPerContrast(c) < 0.025*length(data(data(:,8)==b,2))
+      includeContrast(c) = 0;
+   end
    c=c+1;
-   
+   end
 end
-
 
 % sanity check on contrast
 % take out all trials where contrast is 0
@@ -126,7 +145,7 @@ for k=1:length(noiseSTD)
          params(2) = DA_val(j);
          params(3) = noiseSTD(k);
          counter = counter + 1;
-         [Fval, Fval_l, Fval_r] = FitPOMDP_GS_NLL_New(params, Data);
+         [Fval, Fval_l, Fval_r] = FitPOMDP_GS_NLL_CompleteData(params, Data, includeContrast);
          xanswerStore(counter,:) = params;
          FvalStore(i,j,k) = Fval;
          FvalStore_L(i,j,k) = Fval_l;

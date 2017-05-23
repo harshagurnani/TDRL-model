@@ -2,11 +2,11 @@ close all
 
 % TESTING2 set model parameter values
 alpha       = 0.0 : 0.1 : 1;       % learning rate
-DA_val      = 0.0 : 0.5 : 6.0;       % dopamine value
+DA_val      = 0.0;% : 0.5 : 6.0;       % dopamine value
 noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
 
 % load in animal data
-AnimalID='ALK028'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='SS037'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 
 ExpID = '1';
@@ -14,10 +14,10 @@ ExpID = '1';
 if ~exist('dataAll', 'var')
 dataAll = LoadSavedDataForBehExp (AnimalID, ExpID);
 end
-
+data =dataAll;
 % % blockIDs 1 & 2 represent asymmetric dopamine reward, not included for
 % estimating sigma/alpha
-% data(data(:,8)==3,:)=[];
+data(data(:,8)==3,:)=[];
 % data(data(:,8)==4,:)=[];
 
 data(data(:,8)==1,:)=[];
@@ -100,8 +100,8 @@ PlotColourMap_NLL(alpha,DA_val,noiseSTD,FvalStore)
 %% Run again to get conditional psychometric curves fitted
 
 % Fix noise
-alpha_new       = 0.03 : 0.03 : 1.2;        % learning rate
-DA_val_new      = sort(xanswerMin(:,2));    % dopamine value
+alpha_new       = 0.03 : 0.03 : 1;        % learning rate
+DA_val_new      = 0;%sort(xanswerMin(:,2));    % dopamine value
 noiseSTD_new    = xanswerMin(1,3);          % noise in belief
 
 % Initialise
@@ -173,7 +173,75 @@ xanswerBest = xanswerMin2(1,:);
 % AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
 % 
 % %% Cond PC
+%%
 PlotCondPC_Mice_Model(Data.data, data_modelBest, action, correct, includeContrast)
-% 
+%% %%
 % %% Plot Q-Values
 PlotQValues(data_modelBest, action, correct, QL,QR)
+
+%% Run for Blocks1-2
+
+data2 =dataAll;
+% % blockIDs 1 & 2 represent asymmetric dopamine reward, not included for
+% estimating sigma/alpha
+data2(data2(:,8)==3,:)=[];
+data2(data2(:,8)==4,:)=[];
+% 
+% data2(data2(:,8)==1,:)=[];
+% data2(data2(:,8)==2,:)=[];
+
+
+% check number of trials for each contrast
+contrast2 = unique(data2(:,2))';
+trialsPerContrast2 = nan(length(contrast2),1);
+c=1;
+for i=contrast2
+   
+   trialsPerContrast2(c) = length(data2(data2(:,2)==i,2));
+   
+   c=c+1;
+   
+end
+
+% check number of trials for each contrast
+
+trialsPerContrast2 = nan(length(contrast2)*length(unique(data2(:,8))),1);
+includeContrast2 = ones(size(trialsPerContrast2));
+
+
+c=1;
+for b=unique(data2(:,8))'   
+   for i=contrast2
+   trialsPerContrast2(c) = length(data2(data2(:,2)==i & data2(:,8)==b,2));
+   
+   
+   if trialsPerContrast2(c) < 0.025*length(data2(data2(:,8)==b,2))
+      includeContrast2(c) = 0;
+   end
+   c=c+1;
+   end
+end
+%%%% HG. Not removing stimuli with lower trials - just not calculating likelihood
+%%%% at those stimuli
+
+Data2.data=data2;
+Data2.ID=AnimalID;
+
+xanswerBest2 = xanswerBest;
+% xanswerBest2(1) = 0.45;
+xanswerBest2(2) = 3.6;
+[data_modelBest2, action2, correct2, QL2,QR2] = RunPOMDP_GS_NLL_returnDetails(Data2, [xanswerBest2(1),...
+   xanswerBest2(2),xanswerBest2(3)]);
+%%
+% 
+% %%
+% AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
+% 
+% %% Cond PC
+PlotCondPC_Mice_Model(Data2.data, data_modelBest2, action2, correct2, includeContrast2)
+% 
+% %% Plot Q-Values
+% PlotQValues(data_modelBest2, action2, correct2, QL2,QR2)
+
+
+AllThePlots(Data2,data_modelBest2,xanswerBest2,trialsPerContrast2);
