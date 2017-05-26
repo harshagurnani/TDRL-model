@@ -1,4 +1,4 @@
-function [data_model, action, correct, QL, QR] = RunPOMDP_GS_NLL_returnDetails(Data,params)
+function [percentMatch] = RunPOMDP_returnPercentMatch(Data,params, varargin)
 
 data = Data.data;
 
@@ -19,6 +19,8 @@ reward = [1+DA_val, 1, 1+DA_val, 1;
 
 % set run numbers
 iterN = 99;                    % model values are averaged over iterations
+if nargin>2
+    iterN = varar
 trialN = length(contrastTrials);
 
 
