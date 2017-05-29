@@ -3,8 +3,10 @@ blocks = [1 2];
 allAnimals = dir('*.mat');
 numAnimals = length(allAnimals);
 
-stimuli = [-1 -0.75 -0.5 -0.4 -0.25 -0.1  -0.05 0 0.05  0.1 0.25 0.4 0.5 0.75 1];
+stimuli = [ -0.75 -0.49  0   0.49 0.75];
 shifts = nan( length(stimuli), 2, length(blocks), numAnimals );
+shift_n = nan(length(stimuli),2, length(blocks), numAnimals);
+
 % stimulus, conditional to left/right actions, block, animalID
 for AID=1:numAnimals
     dataAll = importdata(allAnimals(AID).name);
@@ -34,8 +36,23 @@ for AID=1:numAnimals
     for jj=1:length(stims{1})
        minDist = min( abs(stims{1}(jj)-stimuli));
        stimID = find( abs(stims{1}(jj)-stimuli) == minDist );
-       shifts(stimID, :, b, AID) = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
+       if any(isnan(shifts(stimID, :, b, AID)))
+           tmp = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
+           if ~any(isnan(tmp))
+               shifts(stimID, :, b, AID) = tmp';
+               shift_n(stimID,:, b, AID) = 1;
+           else
+               shifts(stimID, :, b, AID) = NaN;
+           end
+       else
+           tmp = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
+           if ~any(isnan(tmp))  
+               shifts(stimID, :, b, AID) = shifts(stimID, :, b, AID) + tmp';
+               shift_n(stimID,:, b, AID) = shift_n(stimID, :, b, AID)+1;
+           end
+       end
     end
-    
     end
 end
+
+shifts = shifts./shift_n;
