@@ -27,9 +27,7 @@ end
 
 % Plot the colour map
 figure('position',[100,100,1200,400]);
-if nargin>4
-    suptitle(varargin{1})
-end
+
 subplot(1,3,1);
 imagesc(x,y,colourVal);
 colorbar
@@ -87,7 +85,9 @@ imagesc(x,y,colourVal);
 colorbar
 xlabel(xData)
 ylabel(yData)
-
+if nargin>4
+    suptitle(varargin{1})
+end
 
 end
 

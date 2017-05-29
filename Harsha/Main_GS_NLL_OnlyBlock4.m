@@ -136,8 +136,8 @@ end
 %% New plots
 
 PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2, 'NLL of Block-wise psychometric curves')
-PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_L, 'NLL of Fraction Right-Choices after Correct Left choices')
-PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_R, 'NLL of Fraction Right-Choices after Correct Right choices')
+PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_L+FvalStore2_R, 'NLL of Conditional P(R)')
+% PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_R, 'NLL of Fraction Right-Choices after Correct Right choices')
 
 %% 3BEST 
 
@@ -168,27 +168,27 @@ xanswerBest = xanswerMin2(1,:);
 
 [data_modelBest, action, correct, QL,QR] = RunPOMDP_GS_NLL_returnDetails(Data, [xanswerBest(1),...
    xanswerBest(2),xanswerBest(3)]);
-% 
+% % 
+% % %%
+% % AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
+% % 
+% % %% Cond PC
 % %%
-% AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
-% 
-% %% Cond PC
-%%
-PlotCondPC_Mice_Model(Data.data, data_modelBest, action, correct, includeContrast)
-%% %%
-% %% Plot Q-Values
-PlotQValues(data_modelBest, action, correct, QL,QR)
+% PlotCondPC_Mice_Model(Data.data, data_modelBest, action, correct, includeContrast)
+% %% %%
+% % %% Plot Q-Values
+% PlotQValues(data_modelBest, action, correct, QL,QR)
 
 %% Run for Blocks1-2
 
 data2 =dataAll;
 % % blockIDs 1 & 2 represent asymmetric dopamine reward, not included for
 % estimating sigma/alpha
-data2(data2(:,8)==3,:)=[];
-data2(data2(:,8)==4,:)=[];
-% 
-% data2(data2(:,8)==1,:)=[];
-% data2(data2(:,8)==2,:)=[];
+% data2(data2(:,8)==3,:)=[];
+% data2(data2(:,8)==4,:)=[];
+
+data2(data2(:,8)==1,:)=[];
+data2(data2(:,8)==2,:)=[];
 
 
 % check number of trials for each contrast
@@ -234,8 +234,8 @@ xanswerBest2(2) = 3.6;
    xanswerBest2(2),xanswerBest2(3)]);
 %%
 % 
-% %%
-% AllThePlots(Data,data_modelBest,xanswerBest,trialsPerContrast);
+%%
+% AllThePlots_New(Data,data_modelBest,xanswerBest,action2, correct2);
 % 
 % %% Cond PC
 PlotCondPC_Mice_Model(Data2.data, data_modelBest2, action2, correct2, includeContrast2)
@@ -244,4 +244,4 @@ PlotCondPC_Mice_Model(Data2.data, data_modelBest2, action2, correct2, includeCon
 % PlotQValues(data_modelBest2, action2, correct2, QL2,QR2)
 
 
-AllThePlots(Data2,data_modelBest2,xanswerBest2,trialsPerContrast2);
+% AllThePlots(Data2,data_modelBest2,xanswerBest2,trialsPerContrast2);

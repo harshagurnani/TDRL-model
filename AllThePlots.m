@@ -1,4 +1,4 @@
- function AllThePlots(Data,data_model,xanswerMin,trialsPerContrast)
+ function AllThePlots_New(Data,data_model, xanswerMin,trialsPerContrast, varargin)
 % Combining all the plots we have
 
 data_mice = Data.data;
@@ -14,75 +14,7 @@ color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
 full = figure;
 
 %% PLOT 1
-
-xx = unique(data_mice(:,2))';
-psycho_xx = min(xx):0.01:max(xx);
-nn = nan(1,length(xx));
-pp = nan(1,length(xx));
-
-
-per_mice = nan(1,length(unique(data_mice(:,2))));
-per_model = nan(1,length(unique(data_mice(:,2))));
-
-
-plotMiceRLandErf = subplot(3,2,1,'Parent',full); hold on
-
-for blockID = unique(data_mice(:,8))'
-   c=1;
-   for istim = unique(data_mice(:,2))'
-      
-      per_mice(c)= nanmean(data_mice(data_mice(:,2)==istim & ...
-         data_mice(:,8)==blockID,3)) ;
-      per_model(c)= nanmean(data_model(data_model(:,2)==istim & ...
-         data_model(:,8)==blockID,16)) ;
-      
-      nn(c) = length(data_mice(data_mice(:,2)==istim & ...
-         data_mice(:,8)==blockID,2));
-      pp(c) = length(data_mice(data_mice(:,2)==istim & ...
-         data_mice(:,8)==blockID & data_mice(:,3)==1,2))/nn(c);
-      
-      c=c+1;
-   end
-   
-   
-   psychoParams = mle_fit_psycho([xx ;nn ;pp],'erf_psycho');
-   
-   [~, V] = binostat(1,pp);  % variance of binomial distribution
-  
-   
-   if blockID==1
-      psychoParams_L = psychoParams;
-   elseif blockID==2
-      psychoParams_R = psychoParams;
-   end
-      
-   
-   % PLOT
-   % plot the mice raw data as points
-   plot(plotMiceRLandErf,unique(data_mice(:,2))',per_mice,...
-      'color',color(blockID,:),'marker','o','markersize',10,...
-      'markeredgecolor',color(blockID,:),'markerfacecolor',color(blockID,:),...
-      'linestyle','none','linewidth',1.2);
-   
-   % plot error bars with sem across sessions
-   errorbar(plotMiceRLandErf,unique(data_mice(:,2))',per_mice,...
-      V ./ sqrt(length(unique(data_mice(:,9)))),'color',color(blockID,:),...
-      'marker','o','markersize',10,'markeredgecolor',color(blockID,:),...
-      'markerfacecolor',color(blockID,:),'linestyle','none',...
-      'linewidth',1.2);
-   
-   %plot the pscychometric function fitted to the mice data
-   plot(plotMiceRLandErf,psycho_xx, erf_psycho(psychoParams,psycho_xx),...
-      'color',color(blockID,:),'linestyle','-','linewidth',1.2);
-   
-   % plot the model
-   plot(plotMiceRLandErf,unique(data_mice(:,2))',per_model,...
-      'color',color(blockID,:),'marker','o','markersize',10,...
-      'markeredgecolor',color(blockID,:),'linestyle','--','linewidth',1.2);
-   
-
-end
-
+PlotPC_Mice_Model(data_mice, data_model, action)
    ylabel(plotMiceRLandErf,'Fraction rightward choice')
    xlabel(plotMiceRLandErf,'Contrast')
    title(plotMiceRLandErf,...
