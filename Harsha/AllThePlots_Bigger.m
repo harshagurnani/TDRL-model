@@ -16,8 +16,8 @@ animalID = Data.ID;
 
 % changing y-axis values
 data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
-data_modelAll(:,16,:) = (1 + data_model(:,16,:)) ./ 2;
-data_modelAll(:,22,:) = (1 + data_model(:,22,:)) ./ 2;
+data_modelAll(:,16,:) = (1 + data_modelAll(:,16,:)) ./ 2;
+data_modelAll(:,22,:) = (1 + data_modelAll(:,22,:)) ./ 2;
 actionAll = ( 1 + actionAll) ./2;
 
 % Best model
@@ -31,7 +31,7 @@ nIters = size(action,2);
 
 % Plotting and data parameters
 color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
-markerShape = {'o', 's', '^', 'v'};
+markerShapes = {'o', 's', '^', 'v'};
 BlockLabels = {'DA-L', 'DA-R','DA-Both', 'No DA'}; 
 
 if any(data_mice(:,8)>2)
@@ -143,7 +143,7 @@ text(.55,0.9,descr2)
 
 subplot(nrows,1,2,'Parent',full);  hold on
 
-plotLen = length(data_mice);
+plotLen = nTrials;
 mouse = data_mice(:,3) ;
 model = data_model(:,22);
 
@@ -368,5 +368,69 @@ plotDA = params2(:,2);
 imagesc( plotDA, alpha2, FvalStore2 );
 title(' NLL of conditional PC for top 5 models (Columns)');
 
+
+
+%-------------------------------------------------------------------------%
+%% PLOT 5 - Performance of top models  
+%-------------------------------------------------------------------------%
+%data_model(:,16) --> mode response/ data_model(:,22) --> Percent match?
+
+
+%----- (Left) Percent match for top 5 models --------------%
+PMatch = nan(nIters, nModels);
+PMatch_mode = nan(nModels,1);
+for model = 1:nModels
+    for jj=1:nIters
+      PMatch(jj, model) = sum( data_mice(:,3) == actionAll(:, jj,model) )/nTrials; 
+    end
+    PMatch_mode(model) = sum(data_mice(:,3) == data_modelAll(:,16,model))/nTrials;
 end
 
+subplot(nrows,2,2*nrows-1); hold on
+for jj=1:nIters
+    plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
+end
+h = zeros(2,1);
+h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10);
+h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
+legend(h, 'Mean Percent Match of responses', 'Percent match of mode response')
+
+
+
+%------------ (Right) Single Trial Shift (STS) in P(R) of expt and top 5 models ----%
+
+% on dopamine reward trials, or error trials of actions associated with
+% dopamine
+mouse_shift = SingleTrialShift_DopTrials( data_mice );
+mouse_dopreward_STS = squeeze(mouse_shift(:,1,2,:) - mouse_shift(:,1,1,:));        % positive
+mouse_doperror_STS  = squeeze(mouse_shift(:,2,2,:) - mouse_shift(:,2,1,:));        % negative
+
+model_shift = nan( [5, 2, 2, 99, 5] );   %Shifts for each top model and its iterations  
+for model = 1:5
+  model_shift(:,:,:,:,model) = SingleTrialShift_DopTrials( squeeze(data_modelAll(:,:,model)), ...
+                                        squeeze(actionAll(:,model)), squeeze(correctAll(:,model))  );
+
+  model_dopreward_STS = squeeze(model_shift(:,1,2,:,:) - model_shift(:,1,1,:,:));        % positive
+  model_doperror_STS  = squeeze(model_shift(:,2,2,:,:) - model_shift(:,2,1,:,:));        % negative
+
+end
+%model - [stimulus, iter, modelNumber], Mice - [stimulus]
+
+subplot(nrows,2,2*nrows); hold on
+h=zeros(2+2*nModels,1);
+blueminus = 1/nModels;
+h(1) = plot( -2:2, mouse_dopreward_STS, 'color', [0 0.5 0], 'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
+h(2) = plot( -2:2, mouse_doperror_STS, 'color', 'r', 'marker', 'o', 'markerfacecolor', 'r', 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
+
+MLabel = cell(2*nModels,1);
+ for model = 1:nModels
+     h(2*model + 1) = plot( -2:2, mean(model_dopreward_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
+                        'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
+     h(2*model + 2) = plot( -2:2, mean(model_doperror_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
+                        'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
+     MLabel{model*2-1} = sprintf('Model %d - Correct Dopamine reward', model);
+     MLabel{model*2}   = sprintf('Model %d - Error', model);
+ end
+ legend(h, 'Mouse - Dopamine reward', 'Mouse - Error', MLabel{:}, 'Location', 'NorthEast');
+
+ end
