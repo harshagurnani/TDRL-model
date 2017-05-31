@@ -1,4 +1,4 @@
- function AllThePlots_New(Data,data_model, xanswerMin,trialsPerContrast, varargin)
+ function AllThePlots(Data,data_model, xanswerMin,trialsPerContrast, varargin)
 % Combining all the plots we have
 
 data_mice = Data.data;
