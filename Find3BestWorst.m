@@ -1,4 +1,4 @@
-function [xanswerMin,xanswerMax] = Find3BestWorst(FvalStore,xanswerStore, varargin)
+function [xanswerMin,xanswerMax] = Find3BestWorst(FvalStoreAll,xanswerStore, varargin)
 % Find the 3 best and 3 worst Fvals
 
 if nargin>2
@@ -6,16 +6,35 @@ if nargin>2
 else
     nanswers = 3; 
 end
-xanswerMin = zeros(nanswers,size(xanswerStore,2));
-xanswerMax = zeros(nanswers,size(xanswerStore,2));
+
+nDim = length(size(FvalStoreAll));
+if nargin>3
+    if varargin{2}
+    nIndModels = size(FvalStoreAll, nDim);
+    end
+    ind_dim = nDim;
+else
+    nIndModels = 1;
+    ind_dim = nDim+1;
+end
+
+
+
+xanswerMin = zeros(nanswers,size(xanswerStore,2), nIndModels );
+xanswerMax = zeros(nanswers,size(xanswerStore,2), nIndModels );
 
 % Search for the maximum and minimum values of F
-tmp = sort(FvalStore(:),'ascend');
-for jj=1:nanswers
-FMin1 = tmp(jj);
-% locMin1 = find(FvalStore == FMin1);
-xanswerMin(jj,:) = xanswerStore(FvalStore == FMin1,:);
+for jj=1:nDim
+    indx{jj}=1:size(FvalStoreAll,jj);
 end
+for model=1:nIndModels
+    indx{ind_dim} = model;
+    FvalStore = FvalStoreAll( indx{:} );
+    tmp = sort(FvalStore(:),'ascend');
+    for jj=1:nanswers
+    FMin1 = tmp(jj);
+    xanswerMin(jj,:, model) = xanswerStore(FvalStore == FMin1,:, model);
+    end
 % FMin2 = tmp(2);
 % locMin2 = find(FvalStore == FMin2);
 % xanswerMin(2,:) = xanswerStore(locMin2,:);
@@ -31,6 +50,8 @@ end
 % FMax3 = tmp(length(FvalStore(:))-2);
 % locMax3 = find(FvalStore == FMax3);
 % xanswerMax(3,:) = xanswerStore(locMax3(1),:);
+end
 
-
+xanswerMin = squeeze(xanswerMin);
+xanswerMax = squeeze(xanswerMax);
 end
