@@ -33,7 +33,8 @@ for AID=1:numAnimals
     %% Get psychometrical curves conditional to prev/next correct L/R choices
     [ stims, nextChoice, prevChoice ] = CondPC_Prev_and_Next( dataAll, includeContrast, blockID );
     % Each has 2 rows - after left and right
-    for jj=1:length(stims{1})
+    if ~any(abs(stims{1}) > 0.6)
+        for jj=1:length(stims{1})
        minDist = min( abs(stims{1}(jj)-stimuli));
        stimID = find( abs(stims{1}(jj)-stimuli) == minDist );
        if any(isnan(shifts(stimID, :, b, AID)))
@@ -51,6 +52,7 @@ for AID=1:numAnimals
                shift_n(stimID,:, b, AID) = shift_n(stimID, :, b, AID)+1;
            end
        end
+    end
     end
     end
 end

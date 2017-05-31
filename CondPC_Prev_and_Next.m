@@ -35,18 +35,18 @@ for blockID = blocks
       
       %After/Before correct left choices.
       id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
-          data_mice(1:end-1,3)==0 & data_mice(1:end-1,10)==1];
+          data_mice(1:end-1,3)==0 & data_mice(1:end-1,10)==1 & data_mice(2:end,7)];
       per_mice_next{b}(1,c)= nanmean(data_mice(id,3)) ;
       id=[data_mice(1:end-1,2)==istim & data_mice(1:end-1,8)==blockID & ...
-          data_mice(2:end,3)==0 & data_mice(2:end,10)==1; false];
+          data_mice(2:end,3)==0 & data_mice(2:end,10)==1  & data_mice(1:end-1,7); false];
       per_mice_prev{b}(1,c)= nanmean(data_mice(id,3)) ;
       
       %After/Before correct right choices.
       id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
-          data_mice(1:end-1,3)==1 & data_mice(1:end-1,10)==1];
+          data_mice(1:end-1,3)==1 & data_mice(1:end-1,10)==1 & data_mice(2:end,7)];
       per_mice_next{b}(2,c)= nanmean(data_mice(id,3)) ;
       id=[data_mice(1:end-1,2)==istim & data_mice(1:end-1,8)==blockID & ...
-          data_mice(2:end,3)==1 & data_mice(2:end,10)==1; false];
+          data_mice(2:end,3)==1 & data_mice(2:end,10)==1  & data_mice(1:end-1,7); false];
       per_mice_prev{b}(2,c)= nanmean(data_mice(id,3)) ;
       
       c=c+1;
