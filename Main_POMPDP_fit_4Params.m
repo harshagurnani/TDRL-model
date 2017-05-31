@@ -179,24 +179,30 @@ end
 % % PlotColourMap_NLL(alpha_new,DA_val_new,noiseSTD_new,FvalStore2_L+FvalStore2_R, 'NLL of Conditional P(R)')
 % 
 % 
+
+%-------------------------------------------------------------------------%
+%% Step 4: Run model on all blocks to exaine Psychometric curves
+%-------------------------------------------------------------------------%
 % 
-% %-------------------------------------------------------------------------%
-% %% Step 4: Run model on all blocks to exaine Psychometric curves
-% %-------------------------------------------------------------------------%
-% 
-% data2 =dataAll;
-% Data2.data=data2;
-% Data2.ID=AnimalID;
-% 
-% 
+data3     =dataAll;
+Data3.data=data3;
+Data3.ID  =AnimalID;
+
+data_models = nan(length(data3), 22, nModels);
+action      = nan(length(data3), 99, nModels);
+correct     = action;
+
 % %%%% HG. Not removing stimuli with lower trials - just not calculating likelihood
 % %%%% at those stimuli
 % 
+
+for model = 1:nModels
+    params = xanswerMin2(model,:);
 % xanswerBest2 = xanswerMin2(1,:);
 % 
 % %% Plot all psychometric and conditional psychometric curves
-% [data_modelBest2, action2, correct2, QL2, QR2 ] = RunPOMDP_GS_NLL_returnDetails(Data2, xanswerBest2);
-% 
+[data_models(:,:,model), action(:,:,model), correct(:,:,model), ~, ~ ] = RunPOMDP_GS_NLL_returnDetails(Data3,params);
+end
 % PlotPC_Mice_Model(Data2.data, data_modelBest2, action2, includeContrast2)
 % PlotCondPC_Mice_Model(Data2.data, data_modelBest2, action2, correct2, includeContrast2)
 % 
