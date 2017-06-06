@@ -18,7 +18,7 @@ for AID=1:numAnimals
     %% Get contrats to include
     % All contrasts in data
     data=dataAll; 
-    data( data(:,2) ~= blockID, :)=[];
+    data( data(:,8) ~= blockID, :)=[];
     trialsPerContrast = nan(length(contrast),1);
     includeContrast = ones(length(contrast),1);
    
