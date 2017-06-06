@@ -6,8 +6,7 @@
  % 
  % If blocks 3/4 present:
  % 4 - (Left/centre) Conditional psychometric curves of Block 3/4 (Right) Alpha with DA conditional NLL
- 
- 
+ % 
  % 4/5 - (Left) Percent match for top 5 models  (Right) Percent shift in P(R) of expt and top 5 models
  % Combining all the plots we have
 
@@ -31,7 +30,7 @@ nIters = size(action,2);
 
 % Plotting and data parameters
 color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
-markerShapes = {'o', 's', '^', 'v'};
+markerShape = {'o', 's', '^', 'v'};
 BlockLabels = {'DA-L', 'DA-R','DA-Both', 'No DA'}; 
 
 if any(data_mice(:,8)>2)
@@ -57,7 +56,7 @@ noiseSTD    = NLLData.noiseSTD;
 Qbias       = NLLData.Qbias;
 
 alpha2      = NLLData.alpha2;
-FvalStore2  = NLLData.alpha2;
+FvalStore2  = NLLData.FvalStore2;
 params2     = NLLData.top5params;
 
 full = figure;
@@ -105,7 +104,7 @@ for blockID = blocks
       'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color(blockID,:),...
       'linestyle','--','linewidth',1.2);
 
-   h( b ) = plot(ax,NaN,NaN,'color',color(blockID,:),'marker',markerShape{blockID},'markersize',10,...
+   h( b ) = plot(NaN,NaN,'color',color(blockID,:),'marker',markerShape{blockID},'markersize',10,...
   'markerfacecolor',color(blockID,:),'markerfacecolor',color(blockID,:),'linestyle','none');
    
 
@@ -113,12 +112,12 @@ end
    
 % dummy plots for the legend
 b=length(blocks);
-h(b+1) = plot(ax,NaN,NaN,'color','k','linestyle','-','linewidth',1.2);
-h(b+2) = plot(ax,NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
+h(b+1) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);
+h(b+2) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
 
 legend(h, BlockLabels{blocks},'Mouse','Model','Location','southeast');
-ylabel(ax,'Fraction rightward choice')
-xlabel(ax,'Contrast')
+ylabel('Fraction rightward choice')
+xlabel('Contrast')
 title('Psychometric curves from Data and Best Model')
 
 %---------------------- Right --------------------------------------------%
@@ -168,10 +167,12 @@ plot(model,'marker','o','MarkerEdgeColor',model_color,...
     'markersize',2,'linestyle','none')
 
 % Block Identities: blue for DA-L, red for DA-R, green for DA-both
-plot( find(blockID==1),-0.03, 'marker', 's', 'markeredgecolor', 'b', 'markerfacecolor', 'b','linestyle', none );
-plot( find(blockID==2), 1.03, 'marker', 's', 'markeredgecolor', 'r', 'markerfacecolor', 'r','linestyle', none );
-plot( find(blockID==3), 1.03, 'marker', 's', 'markeredgecolor', 'g', 'markerfacecolor', 'g','linestyle', none );
-plot( find(blockID==3),-0.03, 'marker', 's', 'markeredgecolor', 'g', 'markerfacecolor', 'g','linestyle', none );
+plot( find(blockID==1),-0.03, 'marker', 's', 'markeredgecolor', 'b', 'markerfacecolor', 'b','linestyle', 'none' ,'markersize',2);
+plot( find(blockID==2), 1.03, 'marker', 's', 'markeredgecolor', 'r', 'markerfacecolor', 'r','linestyle', 'none' ,'markersize',2);
+if any(blockID==3)
+    plot( find(blockID==3), 1.03, 'marker', 's', 'markeredgecolor', 'g', 'markerfacecolor', 'g','linestyle', 'none' ,'markersize',2);
+plot( find(blockID==3),-0.03, 'marker', 's', 'markeredgecolor', 'g', 'markerfacecolor', 'g','linestyle', 'none' ,'markersize',2);
+end
 
 % Plot smoothed P(R)
 plot(smoothmouse,'color',mouse_color)
@@ -193,7 +194,7 @@ set(gca,'visible','on');
 subplot(nrows,1,3)
 title('NLL of Psychometric curves')
 [~,locMin] = min(FvalStore(:));
-[a,b,c,d] = ind2sub(size(FvalStore),locMin);
+[a,b,~,d] = ind2sub(size(FvalStore),locMin);
 
 %------------- (Left) Alpha v/s Noise ------------------%
 clear colourVal x y
@@ -272,13 +273,13 @@ ylabel(yData)
 %-------------------------------------------------------------------------%
 %% (Conditional) PLOT 4 - Conditional choices (For Blocks 3/4 if PRESENT)
 %-------------------------------------------------------------------------%
-
+if any(data_mice(:,8)>2)
 %-- (Left) Conditional Psychometric curves after Left and Right choices
 subplot( nrows, 2, 7); hold on;
-if any(data_mice(:,8)>2)
+
    % Block 3/4 present
    blocks = unique(data_mice(data_mice(:,8)>2,8))'; 
-end
+
 
 per_mice = nan(1, length(contrasts) );
 per_model = per_mice;
@@ -304,7 +305,7 @@ for blockID = blocks
       per_model(1,c)=0;
       per_model(2,c)=0;
       
-      for iter = 1:niters
+      for iter = 1:nIters
           id =[false;data_model(2:end,2)==istim & data_model(2:end,8)==blockID & ...
              action(1:end-1,iter)==0 & correct(1:end-1,iter)==1];
           per_model(1,c)= per_model(1,c) + nanmean(action( id,iter)) ;
@@ -312,37 +313,37 @@ for blockID = blocks
              action(1:end-1,iter)==1 & correct(1:end-1,iter)==1];
           per_model(2,c)= per_model(2,c) + nanmean(action( id,iter)) ;
       end
-      per_model(1,c)=per_model(1,c)/niters;
-      per_model(2,c)=per_model(2,c)/niters;
+      per_model(1,c)=per_model(1,c)/nIters;
+      per_model(2,c)=per_model(2,c)/nIters;
       
       c=c+1;
    end
 
-   plot_contrast = includeContrast(:, blockID )==1;
+   plot_contrast = includeContrast(:, b )==1;
    
    % PLOT
    plot(contrasts(plot_contrast),per_mice(1,plot_contrast),...
       'color',color_b{b},...
-      'marker',markerShapes{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
       'markerfacecolor',color_b{b},'linestyle','-',...
       'linewidth',1.2);
-   plot(ax,contrasts(plot_contrast),per_mice(2,plot_contrast),...
+   plot(contrasts(plot_contrast),per_mice(2,plot_contrast),...
       'color',color_r{b},...
-      'marker',markerShapes{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
       'markerfacecolor',color_r{b},'linestyle','-',...
       'linewidth',1.2);
 
    
    % plot the model
-   plot(ax,contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
-      'marker',markerShapes{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+   plot(contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
+      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
       'linestyle','--','linewidth',1.2);
-   plot(ax,contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
-      'marker',markerShapes{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+   plot(contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
+      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
       'linestyle','--','linewidth',1.2);
 
-   ylabel(ax,'Fraction rightward choice')
-   xlabel(ax,'Contrast')
+   ylabel('Fraction rightward choice')
+   xlabel('Contrast')
    h( 2*b-1 ) = plot(NaN,NaN,'color',color_b{b},'marker',markerShape{blockID},'markersize',10,...
    'markerfacecolor',color_b{b},'markerfacecolor',color_b{b},'linestyle','-');
    h( 2*b ) = plot(NaN,NaN,'color',color_r{b},'marker',markerShape{blockID},'markersize',10,...
@@ -355,8 +356,8 @@ end
    b = 2*length(blocks);
    
  
-   h(b+1) = plot(ax,NaN,NaN,'color','k','linestyle','-','linewidth',1.2);
-   h(b+2) = plot(ax,NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
+   h(b+1) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);
+   h(b+2) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
 
    legend(h, hLabel{:}, 'Mouse','Model','Location','southeast');
 % end
@@ -364,12 +365,22 @@ end
 
 %-- (Right) NLL of conditional PC as a function of alpha
 subplot( nrows, 2, 8); hold on;
-plotDA = params2(:,2);
-imagesc( plotDA, alpha2, FvalStore2 );
+% plotDA = params2(:,2);
+% imagesc( plotDA, alpha2, FvalStore2 );
+
+
+x = params2(:,2)'; 
+y = alpha2; 
+xData = 'DA value of model';
+yData = 'Alpha';
+
+% plot the colour map
+imagesc(x,y,FvalStore2);
+colorbar
+xlabel(xData)
+ylabel(yData)
 title(' NLL of conditional PC for top 5 models (Columns)');
-
-
-
+end
 %-------------------------------------------------------------------------%
 %% PLOT 5 - Performance of top models  
 %-------------------------------------------------------------------------%
@@ -387,12 +398,13 @@ for model = 1:nModels
 end
 
 subplot(nrows,2,2*nrows-1); hold on
-for jj=1:nIters
-    plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
-end
+
 h = zeros(2,1);
 h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10);
 h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
+for jj=1:nIters
+    plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
+end
 legend(h, 'Mean Percent Match of responses', 'Percent match of mode response')
 
 
@@ -408,7 +420,7 @@ mouse_doperror_STS  = squeeze(mouse_shift(:,2,2,:) - mouse_shift(:,2,1,:));     
 model_shift = nan( [5, 2, 2, 99, 5] );   %Shifts for each top model and its iterations  
 for model = 1:5
   model_shift(:,:,:,:,model) = SingleTrialShift_DopTrials( squeeze(data_modelAll(:,:,model)), ...
-                                        squeeze(actionAll(:,model)), squeeze(correctAll(:,model))  );
+                                        squeeze(actionAll(:,:,model)), squeeze(correctAll(:,:,model))  );
 
   model_dopreward_STS = squeeze(model_shift(:,1,2,:,:) - model_shift(:,1,1,:,:));        % positive
   model_doperror_STS  = squeeze(model_shift(:,2,2,:,:) - model_shift(:,2,1,:,:));        % negative
@@ -417,20 +429,20 @@ end
 %model - [stimulus, iter, modelNumber], Mice - [stimulus]
 
 subplot(nrows,2,2*nrows); hold on
-h=zeros(2+2*nModels,1);
-blueminus = 1/nModels;
+h=zeros(2+2*2,1);
+blueminus = 0.4;
 h(1) = plot( -2:2, mouse_dopreward_STS, 'color', [0 0.5 0], 'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
 h(2) = plot( -2:2, mouse_doperror_STS, 'color', 'r', 'marker', 'o', 'markerfacecolor', 'r', 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
 
-MLabel = cell(2*nModels,1);
- for model = 1:nModels
-     h(2*model + 1) = plot( -2:2, mean(model_dopreward_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
+MLabel = cell(2*2,1);
+for model = 1:2
+    h(2*model + 1) = plot( -2:2, mean(model_dopreward_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
                         'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
-     h(2*model + 2) = plot( -2:2, mean(model_doperror_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
+    h(2*model + 2) = plot( -2:2, mean(model_doperror_STS(:,:,model),2), 'color', [1-blueminus*(model-1) 1 0], 'marker', 's', 'markerfacecolor', [1-blueminus*(model-1) 1 0],...
                         'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
-     MLabel{model*2-1} = sprintf('Model %d - Correct Dopamine reward', model);
-     MLabel{model*2}   = sprintf('Model %d - Error', model);
- end
- legend(h, 'Mouse - Dopamine reward', 'Mouse - Error', MLabel{:}, 'Location', 'NorthEast');
+    MLabel{model*2-1} = sprintf('Model %d - Correct Dopamine reward', model);
+    MLabel{model*2}   = sprintf('Model %d - Error', model);
+end
+legend(h, 'Mouse - Dopamine reward', 'Mouse - Error', MLabel{:}, 'Location', 'NorthEast');
 
  end
