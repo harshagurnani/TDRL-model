@@ -1,7 +1,9 @@
 function [ stimuli, per_mice_next, per_mice_prev ] = Cond_to_Dop_PC_Prev_and_Next(data_mice, varargin)
 
 % changing y-axis values
+if any(data_mice(:,3) == -1)
 data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
+end
 contrasts = unique(data_mice(:,2))';
 
 
