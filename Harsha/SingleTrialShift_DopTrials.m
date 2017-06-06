@@ -15,7 +15,7 @@ function [ shifts ] = SingleTrialShift_DopTrials( dataGiven , varargin )
     
     % Contrasts to include (sufficient number of trials)
     trialsPerContrast = nan(length(contrast),1);
-    includeContrast = ones(length(contrast),1);
+    
 
     
     
@@ -29,13 +29,13 @@ function [ shifts ] = SingleTrialShift_DopTrials( dataGiven , varargin )
         % Replace actions/correct with iteration values, if applicable
         dataAll(:,3) = action(:,AID);
         dataAll(:,10)   = correct(:,AID);
-        
+        includeContrast = ones(length(contrast),1);
         b=0;
         for blockID = blocks
         b=b+1;
         %% Get contrats to include
         data=dataAll; 
-        data( data(:,2) ~= blockID, :)=[];
+        data( data(:,8) ~= blockID, :)=[];
         c=1;
         for ii=contrast
           trialsPerContrast(c) = length(data(data(:,2)==ii,2));
@@ -45,7 +45,7 @@ function [ shifts ] = SingleTrialShift_DopTrials( dataGiven , varargin )
         c=c+1;
         end
 
-        %% Get psychometrical curves conditional to prev/next correct L/R choices
+        %% Get psychometric curves conditional to prev/next correct L/R choices
         [ stims, nextChoice, prevChoice ] = Cond_to_Dop_PC_Prev_and_Next( dataAll, includeContrast, blockID );
         % Each has 2 rows - after correct and error / Stims only has 1 row
 
@@ -62,19 +62,41 @@ function [ shifts ] = SingleTrialShift_DopTrials( dataGiven , varargin )
            else
                stimID = 1;
            end
-           if any(isnan(shifts(stimID, :, b, AID)))
+%            if any(isnan(shifts(stimID, :, b, AID)))
+           if isnan(shifts(stimID, 1, b, AID))
                tmp = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
-               if ~any(isnan(tmp))
-                   shifts(stimID, :, b, AID) = tmp';
-                   shift_n(stimID,:, b, AID) = 1;
-               else
-                   shifts(stimID, :, b, AID) = NaN;
+%                if ~any(isnan(tmp))
+               if any(~isnan(tmp))
+               
+                   if ~isnan(tmp(1))
+                   shifts(stimID, 1, b, AID) = tmp(1);
+                   shift_n(stimID,1, b, AID) = 1;
+                   end
+                   
+                   if ~isnan(tmp(2))
+                   shifts(stimID, 2, b, AID) = tmp(2);
+                   shift_n(stimID,2, b, AID) = 1;
+                   end
+%                else
+%                    shifts(stimID, :, b, AID) = NaN;
                end
            else
                tmp = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
-               if ~any(isnan(tmp))  
-                   shifts(stimID, :, b, AID) = shifts(stimID, :, b, AID) + tmp';
-                   shift_n(stimID,:, b, AID) = shift_n(stimID, :, b, AID)+1;
+%                if ~any(isnan(tmp)) 
+                if any(~isnan(tmp))  
+                   if ~isnan(tmp(1))
+                    shifts(stimID, 1, b, AID) = shifts(stimID, 1, b, AID) + tmp(1);
+                    shift_n(stimID,1, b, AID) = shift_n(stimID, 1, b, AID)+1;
+                   end
+                   if ~isnan(tmp(2))
+                       if ~isnan( shifts(stimID, 2, b, AID))
+                        shifts(stimID, 2, b, AID) = shifts(stimID,2, b, AID) + tmp(2);
+                        shift_n(stimID,2, b, AID) = shift_n(stimID,2, b, AID)+1;
+                       else
+                        shifts(stimID, 2, b, AID) = tmp(2);
+                        shift_n(stimID,2, b, AID) = 1;
+                       end
+                   end
                end
            end
         end
