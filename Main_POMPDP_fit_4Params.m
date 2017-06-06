@@ -16,11 +16,11 @@ close all
 % set model parameter values
 alpha       = 0.03 : 0.07 : 0.7;     % learning rate
 DA_val      = 0 : 0.5 : 6.0;         % dopamine value
-noiseSTD    = 0.02 : 0.02 : 0.42;    % noise in belief
+noiseSTD    = 0.02 : 0.02 : 0.52;    % noise in belief
 Qbias       = -0.2 : 0.05 : 0.2;     % bias in Q-value
 
 % load in animal data if not already present
-AnimalID='SS037'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK045'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 ExpID = '1';
 
@@ -49,7 +49,7 @@ for b= blocks
     trialsPerContrast(c) = length(data(data(:,2)==ii & data(:,8)==b,2));
 
 
-    if trialsPerContrast(c) < 0.025*length(data(data(:,8)==b,2))
+    if trialsPerContrast(c) < 0.05*length(data(data(:,8)==b,2))
       includeContrast(c) = 0;
     end
     c=c+1;
@@ -100,14 +100,27 @@ nModels = 5;
 %-------------------------------------------------------------------------%
 %% Step 2: If Block 3/4 exists, fit alpha again using conditional PC
 %-------------------------------------------------------------------------%
-
+    % Fix sigma, DAval, and bias
+    alpha_new       = 0.03 : 0.03 : 0.8;       % learning rate
+    DA_val_new      = xanswerMin(:,2)';           % dopamine value
+    noiseSTD_new    = xanswerMin(:,3)';           % noise in belief
+    Qbias_new       = xanswerMin(:,4)';           % bias in QValue
+    
+        % Initialise
+    Nruns2 = length(alpha_new);                % Only vary alpha for top 5 models (combination preserved)
+    params = nan(4,1);
+    xanswerStore2 = nan(Nruns2,4,nModels);
+    FvalStore2 = nan(length(alpha_new),nModels);
+    FvalStore2_L = FvalStore2;
+    FvalStore2_R = FvalStore2;
+    
 if any(data(:,8)>2)
     % Block 3/4 present
     data2 = dataAll;
 
     % Remove other blocks
-    data2( data(:,8)==1, :) =[];
-    data2( data(:,8)==2, :) =[];
+    data2( data2(:,8)==1, :) =[];
+    data2( data2(:,8)==2, :) =[];
     Data2.data = data2;
     Data2.ID=AnimalID;
 
@@ -130,19 +143,9 @@ if any(data(:,8)>2)
       end
     end
     
-    % Fix sigma, DAval, and bias
-    alpha_new       = 0.03 : 0.03 : 0.8;       % learning rate
-    DA_val_new      = xanswerMin(:,2)';           % dopamine value
-    noiseSTD_new    = xanswerMin(:,3)';           % noise in belief
-    Qbias_new       = xanswerMin(:,4)';           % bias in QValue
 
-    % Initialise
-    Nruns2 = length(alpha_new);                % Only vary alpha for top 5 models (combination preserved)
-    params = nan(4,1);
-    xanswerStore2 = nan(Nruns2,4,nModels);
-    FvalStore2 = nan(length(alpha_new),nModels);
-    FvalStore2_L = FvalStore2;
-    FvalStore2_R = FvalStore2;
+
+
 
     iterN = 21;     
     % Run over parameter values
