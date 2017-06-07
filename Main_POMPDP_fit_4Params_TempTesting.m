@@ -84,7 +84,7 @@ for kk=1:length(noiseSTD)
          params(4) = Qbias(bb);
          counter = counter + 1;
          %%%%%%%% Need to write model with bias
-         [Fval, ~,~] = Get_NLL_ModelWithBias(params, Data,  includeContrast, iterN);
+         [Fval, ~,~] = Get_NLL_ModelWithBias_TempTesting(params, Data,  includeContrast, iterN);
          xanswerStore(counter,:) = params;
          FvalStore(ii,jj,kk,bb) = Fval;
       end
@@ -160,7 +160,7 @@ if any(data(:,8)>2)
              params(3) = noiseSTD_new(kk);
              params(4) = Qbias_new(kk);
              counter = counter + 1;
-             [Fval, Fval_l, Fval_r] = Get_NLL_ModelWithBias(params, Data2, includeContrast2, iterN);
+             [Fval, Fval_l, Fval_r] = Get_NLL_ModelWithBias_TempTesting(params, Data2, includeContrast2, iterN);
              xanswerStore2(counter,:,kk) = params;
              FvalStore2(ii,kk) = Fval;
              FvalStore2_L(ii,kk) = Fval_l;
