@@ -7,7 +7,7 @@
  % If blocks 3/4 present:
  % 4 - (Left/centre) Conditional psychometric curves of Block 3/4 (Right) Alpha with DA conditional NLL
  % 
- % 4/5 - (Left) Percent match for top 5 models  (Right) Percent shift in P(R) of expt and top 5 models
+ % 4/5 - (Left) Percent match for top 5 models  (Middle) Shifts after easy/difficult stimuli - mouse and model. (Right) Percent shift in P(R) of expt and top 5 models
  % Combining all the plots we have
 
 data_mice = Data.data;
@@ -65,7 +65,7 @@ full = figure;
 %% PLOT 1 - (Left) Psychometric curves of blocks 1 and 2. (Right) Details of parameters fit
 %-------------------------------------------------------------------------%
 
-%-------------- Left -----------------------------------------------------%
+%% -------------- Left -----------------------------------------------------%
 subplot(nrows, 2, 1 ); hold on;
 blocks = [ 1 2];
 b=0;
@@ -120,7 +120,7 @@ ylabel('Fraction rightward choice')
 xlabel('Contrast')
 title('Psychometric curves from Data and Best Model')
 
-%---------------------- Right --------------------------------------------%
+%% ---------------------- Right --------------------------------------------%
 % put all the explanation in this subplot
 subplot(nrows,2,2); hold on;
 set(gca,'visible','off');
@@ -134,6 +134,8 @@ descr2 = {'Model parameter values:';
    ['noiseSTD = ',num2str(xanswerMin(1,3))];
    ['Bias in QValue = ',num2str(xanswerMin(1,4))];};
 text(.55,0.9,descr2)
+
+
 
 %-------------------------------------------------------------------------%
 %% PLOT 2 -  Model and experimental P(R) sliding over all sessions
@@ -196,7 +198,7 @@ title('NLL of Psychometric curves')
 [~,locMin] = min(FvalStore(:));
 [a,b,~,d] = ind2sub(size(FvalStore),locMin);
 
-%------------- (Left) Alpha v/s Noise ------------------%
+%% ------------- (Left) Alpha v/s Noise ------------------%
 clear colourVal x y
 colourVal = nan( length(alpha),length(noiseSTD));
 for j=1:length(noiseSTD)
@@ -220,7 +222,7 @@ colorbar
 xlabel(xData)
 ylabel(yData)
 
-%------------- (Middle) DAVal v/s Noise ------------------%
+%% ------------- (Middle) DAVal v/s Noise ------------------%
 clear colourVal x y
 colourVal = nan(length(DAval),length(noiseSTD));
 for j=1:length(noiseSTD)
@@ -245,7 +247,7 @@ colorbar
 xlabel(xData)
 ylabel(yData)
 
-%------------- (Right) Qbias v/s Noise ------------------%
+%% ------------- (Right) Qbias v/s Noise ------------------%
 clear colourVal x y
 colourVal = nan(length(Qbias),length(noiseSTD));
 for j=1:length(noiseSTD)
@@ -279,16 +281,21 @@ subplot( nrows, 2, 7); hold on;
 
    % Block 3/4 present
    blocks = unique(data_mice(data_mice(:,8)>2,8))'; 
-
+   mB = 5;
+   if ~isempty(blocks)
+       mB = max(blocks);
+   end
 
 per_mice = nan(1, length(contrasts) );
 per_model = per_mice;
 
-h = zeros(2*length(blocks)+2,1);
+% h = zeros(2*length(blocks)+2,1);
+h = zeros(2+2,1);
 b=0;
-color_b={'b', 'cyan'};
-color_r = {'r', 'm'};
-hLabel = cell(2*length(blocks),1);
+color_b={'cyan','cyan'};
+color_r = {'m','m'};
+% hLabel = cell(2*length(blocks),1);
+hLabel = cell(2,1);
 for blockID = blocks
    b=b+1;
    c=1;
@@ -321,49 +328,53 @@ for blockID = blocks
 
    plot_contrast = includeContrast(:, b )==1;
    
-   % PLOT
-   plot(contrasts(plot_contrast),per_mice(1,plot_contrast),...
-      'color',color_b{b},...
-      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
-      'markerfacecolor',color_b{b},'linestyle','-',...
-      'linewidth',1.2);
-   plot(contrasts(plot_contrast),per_mice(2,plot_contrast),...
-      'color',color_r{b},...
-      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
-      'markerfacecolor',color_r{b},'linestyle','-',...
-      'linewidth',1.2);
+   % PLOT only block 4, or block 3 if no block 4 present
+   if blockID == mB
+       
+       % plot mouse
+       plot(contrasts(plot_contrast),per_mice(1,plot_contrast),...
+          'color',color_b{b},...
+          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+          'markerfacecolor',color_b{b},'linestyle','-',...
+          'linewidth',1.2);
+       plot(contrasts(plot_contrast),per_mice(2,plot_contrast),...
+          'color',color_r{b},...
+          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+          'markerfacecolor',color_r{b},'linestyle','-',...
+          'linewidth',1.2);
 
-   
-   % plot the model
-   plot(contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
-      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
-      'linestyle','--','linewidth',1.2);
-   plot(contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
-      'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
-      'linestyle','--','linewidth',1.2);
 
-   ylabel('Fraction rightward choice')
-   xlabel('Contrast')
-   h( 2*b-1 ) = plot(NaN,NaN,'color',color_b{b},'marker',markerShape{blockID},'markersize',10,...
-   'markerfacecolor',color_b{b},'markerfacecolor',color_b{b},'linestyle','-');
-   h( 2*b ) = plot(NaN,NaN,'color',color_r{b},'marker',markerShape{blockID},'markersize',10,...
-   'markerfacecolor',color_r{b},'markerfacecolor',color_r{b},'linestyle','-');
-  
-   hLabel{2*b-1} = strcat( 'After Left - ', BlockLabels{blockID});
-   hLabel{2*b}   = strcat( 'After Right - ', BlockLabels{blockID});
+       % plot the model
+       plot(contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
+          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+          'linestyle','--','linewidth',1.2);
+       plot(contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
+          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+          'linestyle','--','linewidth',1.2);
+
+       ylabel('Fraction rightward choice')
+       xlabel('Contrast')
+       h( 1 ) = plot(NaN,NaN,'color',color_b{b},'marker',markerShape{blockID},'markersize',10,...
+       'markerfacecolor',color_b{b},'markerfacecolor',color_b{b},'linestyle','-');
+       h( 2 ) = plot(NaN,NaN,'color',color_r{b},'marker',markerShape{blockID},'markersize',10,...
+       'markerfacecolor',color_r{b},'markerfacecolor',color_r{b},'linestyle','-');
+
+       hLabel{1} = strcat( 'After Left - ', BlockLabels{blockID});
+       hLabel{2}   = strcat( 'After Right - ', BlockLabels{blockID});
+   end
 end
 
-   b = 2*length(blocks);
+   %b = 2*length(blocks);
    
  
-   h(b+1) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);
-   h(b+2) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
+   h(3) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);    
+   h(4) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
 
    legend(h, hLabel{:}, 'Mouse','Model','Location','southeast');
 % end
 
 
-%-- (Right) NLL of conditional PC as a function of alpha
+%% -- (Right) NLL of conditional PC as a function of alpha
 subplot( nrows, 2, 8); hold on;
 % plotDA = params2(:,2);
 % imagesc( plotDA, alpha2, FvalStore2 );
@@ -381,13 +392,15 @@ xlabel(xData)
 ylabel(yData)
 title(' NLL of conditional PC for top 5 models (Columns)');
 end
+
+
 %-------------------------------------------------------------------------%
 %% PLOT 5 - Performance of top models  
 %-------------------------------------------------------------------------%
 %data_model(:,16) --> mode response/ data_model(:,22) --> Percent match?
 
 
-%----- (Left) Percent match for top 5 models --------------%
+%% ----- (Left) Percent match for top 5 models --------------%
 PMatch = nan(nIters, nModels);
 PMatch_mode = nan(nModels,1);
 for model = 1:nModels
@@ -397,52 +410,137 @@ for model = 1:nModels
     PMatch_mode(model) = sum(data_mice(:,3) == data_modelAll(:,16,model))/nTrials;
 end
 
-subplot(nrows,2,2*nrows-1); hold on
+subplot(nrows,3,3*nrows-2); hold on
 
 h = zeros(2,1);
-h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10);
-h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
+h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10,'linestyle','none');
+% h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
 for jj=1:nIters
     plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
 end
-legend(h, 'Mean Percent Match of responses', 'Percent match of mode response')
+legend(h(1), 'Mean Percent Match of responses')%, 'Percent match of mode response')
+set(gca, 'xtick', 1:nModels, 'xlabel', 'Model number');
+
+%% ------------ (Middle) Single Trial Shift (STS) in P(R) after dopamine reward : Conditioned on stimulus difficulty ----%
+
+model = 1; % only compare best model
+% shift
+[ stimuli_M, mouse_shift_allstim, mouse_ED_PC, mouse_ED_IC ] = SingleTrialShift_EasyDiffStim_with_Dop( data_mice );
+[ stimuli_m, model_shift_allstim, model_ED_PC, model_ED_IC ] = SingleTrialShift_EasyDiffStim_with_Dop( squeeze(data_modelAll(:,:,model)), squeeze(actionAll(:,:,model)), squeeze(correctAll(:,:,model))  );
+
+subplot(nrows,3,3*nrows-1); hold on
+h=zeros(8+1,1);
+MLabel = cell(8+1,1);
+% PLOT MOUSE
+% delta P(R) will be negative
+h(1) = plot( stimuli_M, mouse_shift_allstim(:,1,1),  'color', 'k', 'marker', 'o', 'markerfacecolor', 'k', 'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+h(2) = plot( stimuli_M, mouse_shift_allstim(:,1,2),  'color', 'b', 'marker', 'o', 'markerfacecolor', 'b', 'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+% delta P(R) will be positive
+h(3) = plot( stimuli_M, mouse_shift_allstim(:,2,1),  'color', 'k', 'marker', 'o', 'markerfacecolor', 'k', 'markersize', 10, 'linestyle', '-.', 'linewidth',2) ;
+h(4) = plot( stimuli_M, mouse_shift_allstim(:,2,2),  'color', 'r', 'marker', 'o', 'markerfacecolor', 'r', 'markersize', 10, 'linestyle', '-.', 'linewidth',2) ;
+MLabel{1} = 'Mouse - Easy Stim in DA-L';
+MLabel{2} = 'Diff stim in DA-L';
+MLabel{3} = 'Easy stim in DA-R';
+MLabel{4} = 'Diff stim in DA-R';
+
+h(5) = plot( NaN, NaN, 'color', 'w'); %Blank  line in legend
+MLabel{5} = '';
+
+% PLOT BEST MODEL
+model = 1; % only plot model 1 
+h(6) = plot( stimuli_m, mean(mouse_shift_allstim(:,1,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markersize', 7, 'linestyle', '-',  'linewidth',1) ;
+h(7) = plot( stimuli_m, mean(model_shift_allstim(:,1,2,:),4),  'color', 'cyan',      'marker', 's',  'markersize', 7, 'linestyle', '-',  'linewidth',1) ;
+                
+h(8) = plot( stimuli_m, mean(model_shift_allstim(:,2,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markersize', 7, 'linestyle', '-.', 'linewidth',1) ;
+h(9) = plot( stimuli_m, mean(model_shift_allstim(:,2,2,:),4),  'color', 'm',         'marker', 's',  'markersize', 7, 'linestyle', '-.', 'linewidth',1) ;
+                
+MLabel{6} = sprintf('Model %d - Easy Stim in DA-L', model);
+MLabel{7} = 'Diff stim in DA-L';
+MLabel{8} = 'Easy stim in DA-R';
+MLabel{9} = 'Diff stim in DA-R';
+
+ylabel('Change in P(R)')
+xlabel('Stimulus')
+legend(h, MLabel{:}, 'Location', 'NorthEast');
 
 
+%% ------------ (Right) Single Trial Shift (STS) after Dopamine or Water Reward and Omission ----%
 
-%------------ (Right) Single Trial Shift (STS) in P(R) of expt and top 5 models ----%
+% on dopamine/water reward trials, or error trials of actions associated with
+% dopamine/water
 
-% on dopamine reward trials, or error trials of actions associated with
-% dopamine
-mouse_shift = SingleTrialShift_DopTrials_OneEasy( data_mice );
-mouse_dopreward_STS = squeeze(mouse_shift(:,1,2,:) - mouse_shift(:,1,1,:));        % positive
-mouse_doperror_STS  = squeeze(mouse_shift(:,2,2,:) - mouse_shift(:,2,1,:));        % negative
+% new independent way of calculating shift - doesn't have stim levels yet
+% mouse_shift_dop = CondPsychCurves_AfterDop( data_mice(:,2), data_mice(:,8), data_mice(:,3), data_mice(:,10) );
+% mouse_shift_water = CondPsychCurves_AfterWater( data_mice(:,2), data_mice(:,8), data_mice(:,3), data_mice(:,10) );
 
-model_shift = nan( [5, 2, 2, 99, 5] );   %Shifts for each top model and its iterations  
+%shift : [ stimulus level -2 to 2,     correct/error,      blockID,       numIters ]
+mouse_shift_dop     = SingleTrialShift_DopTrials_OneEasy( data_mice );
+mouse_shift_water   = SingleTrialShift_WaterTrials_OneEasy( data_mice );
+
+
+% delta P(R) on block 2 + delta P(L) on block 1
+mouse_dopreward_STS     = squeeze(mouse_shift_dop(:,1,2,:) - mouse_shift_dop(:,1,1,:));               % expected to be positive
+mouse_doperror_STS      = squeeze(mouse_shift_dop(:,2,2,:) - mouse_shift_dop(:,2,1,:));               % expected to be negative
+
+% delta P(L) on block 2 + delta P(R) on block 1
+mouse_waterreward_STS   = squeeze( - mouse_shift_water(:,1,2,:) + mouse_shift_water(:,1,1,:));        % expected to be positive
+mouse_watererror_STS    = squeeze( - mouse_shift_water(:,2,2,:) + mouse_shift_water(:,2,1,:));        % expected to be negative
+
+%shift : [ stimulus level -2 to 2,     correct/error,      blockID,       numIters,         numModels ]
+model_shift_dop = nan( [5, 2, 2, 99, 5] );   %Shifts for each top model and its iterations  
+model_shift_water = model_shift_dop;
+
 for model = 1:5
-  model_shift(:,:,:,:,model) = SingleTrialShift_DopTrials_OneEasy( squeeze(data_modelAll(:,:,model)), ...
+  model_shift_dop(:,:,:,:,model)   = SingleTrialShift_DopTrials_OneEasy( squeeze(data_modelAll(:,:,model)), ...
                                         squeeze(actionAll(:,:,model)), squeeze(correctAll(:,:,model))  );
-
-  model_dopreward_STS = squeeze(model_shift(:,1,2,:,:) - model_shift(:,1,1,:,:));        % positive
-  model_doperror_STS  = squeeze(model_shift(:,2,2,:,:) - model_shift(:,2,1,:,:));        % negative
+  model_shift_water(:,:,:,:,model) = SingleTrialShift_WaterTrials_OneEasy( squeeze(data_modelAll(:,:,model)), ...
+                                        squeeze(actionAll(:,:,model)), squeeze(correctAll(:,:,model))  );
+                                    
+  % delta PR on block 2 + delta PL on block 1
+  model_dopreward_STS   = squeeze(   model_shift_dop(:,1,2,:,:)   - model_shift_dop(:,1,1,:,:));        % expected to be positive
+  model_doperror_STS    = squeeze(   model_shift_dop(:,2,2,:,:)   - model_shift_dop(:,2,1,:,:));        % expected to be negative
+  
+  % delta PL on block 2 + delta PR on block 1
+  model_waterreward_STS = squeeze( - model_shift_water(:,1,2,:,:) + model_shift_water(:,1,1,:,:));       % expected to be positive
+  model_watererror_STS  = squeeze( - model_shift_water(:,2,2,:,:) + model_shift_water(:,2,1,:,:));       % expected to be negative
 
 end
+
+% shifts combined across blocks: 
 %model - [stimulus, iter, modelNumber], Mice - [stimulus]
 
-subplot(nrows,2,2*nrows); hold on
-h=zeros(2+2*2,1);
-blueminus = 0.4;
-h(1) = plot( -2:2, mouse_dopreward_STS, 'color', [0 0.5 0], 'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
-h(2) = plot( -2:2, mouse_doperror_STS, 'color', 'r', 'marker', 'o', 'markerfacecolor', 'r', 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;
 
-MLabel = cell(2*2,1);
-for model = 1:2
-    h(2*model + 1) = plot( -2:2, mean(model_dopreward_STS(:,:,model),2), 'color', [0 1 1-blueminus*(model-1)], 'marker', 's', 'markerfacecolor', [0 1 1-blueminus*(model-1)],...
-                        'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
-    h(2*model + 2) = plot( -2:2, mean(model_doperror_STS(:,:,model),2), 'color', [1-blueminus*(model-1) 1 0], 'marker', 's', 'markerfacecolor', [1-blueminus*(model-1) 1 0],...
-                        'markersize', 10, 'linestyle', '--', 'linewidth',0.5) ;
-    MLabel{model*2-1} = sprintf('Model %d - Correct Dopamine reward', model);
-    MLabel{model*2}   = sprintf('Model %d - Error', model);
-end
-legend(h, 'Mouse - Dopamine reward', 'Mouse - Error', MLabel{:}, 'Location', 'NorthEast');
+subplot(nrows,3,3*nrows); hold on
+h=zeros(8+1,1);
+MLabel = cell(8+1,1);
+
+%%% PLOT MOUSE
+h(1) = plot( -2:2, mouse_dopreward_STS,                     'color', [0 0.5 0],   'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+h(2) = plot( -2:2, mouse_doperror_STS,                      'color', 'r',         'marker', 'o', 'markerfacecolor', 'r',       'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+h(3) = plot( -2:2, mouse_waterreward_STS,                   'color', [0 0.5 0],   'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
+h(4) = plot( -2:2, mouse_watererror_STS,                    'color', 'r',         'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
+MLabel{1} = 'Mouse - DA reward';
+MLabel{2} = 'DA Error';
+MLabel{3} = 'Water reward';
+MLabel{4} = 'Water Error';
+
+h(5) = plot( NaN, NaN, 'color', 'w'); %Blank  line in legend
+MLabel{5} = '';
+
+%%% PLOT BEST MODEL
+model = 1; % only plot model 1
+h(6) = plot( -2:2, mean(model_dopreward_STS(:,:,model),2),  'color', 'g',         'marker', 's',  'markerfacecolor', 'g',   'markersize', 10, 'linestyle', '-',  'linewidth',1) ;
+h(7) = plot( -2:2, mean(model_doperror_STS(:,:,model),2),   'color', 'm',         'marker', 's',  'markerfacecolor', 'm',   'markersize', 10, 'linestyle', '-',  'linewidth',1) ;                
+h(8) = plot( -2:2, mean(model_waterreward_STS(:,:,model),2),'color', 'g',         'marker', 's',                            'markersize', 10, 'linestyle', '--', 'linewidth',1) ;
+h(9) = plot( -2:2, mean(model_watererror_STS(:,:,model),2), 'color', 'm',         'marker', 's',                            'markersize', 10, 'linestyle', '--', 'linewidth',1) ;                
+MLabel{6} = sprintf('Model %d - DA reward', model);
+MLabel{7} = 'DA Error';
+MLabel{8} = 'Water reward';
+MLabel{9} = 'Water Error';
+
+legend(h, MLabel{:}, 'Location', 'NorthEast');
+set(gca, 'xtick', -2:2, 'xticklabel', {'Easy Left', 'Diff Left', 'Zero C', 'Diff Right', 'Easy Right' } )
+ylabel('Change in P[previous action]')
+xlabel('Stimulus')
 
  end
