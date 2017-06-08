@@ -6,7 +6,7 @@ blockLabel = {'Left', 'Right', 'DA-Both', 'DA-None'};
 
 % changing y-axis values
 if any(data_mice(:,3) == -1)
-data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
+  data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
 end
 contrasts = unique(data_mice(:,2))';
 
@@ -22,17 +22,16 @@ trialsPerContrast = nan(length(contrasts), 1);
 c=1;
 
 for ii=contrasts
-trialsPerContrast(c) = length(data_mice(data_mice(:,2)==ii,2));
-
-
-if trialsPerContrast(c) < 0.05*length(data_mice)
-includeContrast(c) = 0;
-end
-c=c+1;
+    trialsPerContrast(c) = length(data_mice(data_mice(:,2)==ii,2));
+    if trialsPerContrast(c) < 0.05*length(data_mice)
+    includeContrast(c) = 0;
+    end
+    c=c+1;
 end
 
-per_mice_next = nan(length(contrasts),2,2); per_mice_prev = per_mice_next;
-% Contrasts, R or L, Easy or Diff
+per_mice_next = nan(length(contrasts),2,2); 
+per_mice_prev = per_mice_next;
+% Contrasts, DA-L or DA-R, Easy or Diff
 
 
 stimuli = contrasts(includeContrast ==1 );
@@ -42,8 +41,11 @@ h = zeros(4,1);
 mLabel = cell(4,1);
 
 IsStimEasy = nan(length(data_mice),1);
+IsStimDiff = IsStimEasy;
 stimSorted = sort( stimuli, 'ascend');
-diffStim = [ stimSorted(2) stimSorted(end-1) ]
+
+easystim = [ stimSorted(1) stimSorted(end) ];
+diffStim = [ max(stimuli(stimuli<0)) 0 min(stimuli(stimuli>0)) ];
 
 IsStimEasy = (data_mice(:,2)<=diffStim(1) | data_mice(:,2)>=diffStim(2));
 
