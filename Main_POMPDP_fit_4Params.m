@@ -20,7 +20,7 @@ noiseSTD    = 0.02 : 0.02 : 0.52;    % noise in belief
 Qbias       = -0.2 : 0.05 : 0.2;     % bias in Q-value
 
 % load in animal data if not already present
-AnimalID='ALK045'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK025'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 ExpID = '1';
 
@@ -36,7 +36,7 @@ data =dataAll;
 Data.data=data;
 Data.ID=AnimalID;
 
-%% check contrasts with insufficient number of trials (<2.5% of block trials)
+%% check contrasts with insufficient number of trials (<5% of block trials)
 
 contrast = unique(data(:,2))';
 blocks = unique(data(:,8))';        %Should only be block 4, or none.
@@ -136,7 +136,7 @@ if any(data(:,8)>2)
         trialsPerContrast2(c) = length(data2(data2(:,2)==ii & data2(:,8)==b,2));
 
 
-        if trialsPerContrast2(c) < 0.025*length(data2(data2(:,8)==b,2))
+        if trialsPerContrast2(c) < 0.05*length(data2(data2(:,8)==b,2))
         includeContrast2(c) = 0;
         end
         c=c+1;
@@ -195,9 +195,6 @@ data_models = nan(length(data3), 22, nModels);
 action      = nan(length(data3), 99, nModels);
 correct     = action;
 
-% %%%% HG. Not removing stimuli with lower trials - just not calculating likelihood
-% %%%% at those stimuli
-% 
 
 for model = 1:nModels
     params = xanswerMin2(model,:);

@@ -36,7 +36,7 @@ data =dataAll;
 Data.data=data;
 Data.ID=AnimalID;
 
-%% check contrasts with insufficient number of trials (<2.5% of block trials)
+%% check contrasts with insufficient number of trials (<5% of block trials)
 
 contrast = unique(data(:,2))';
 blocks = unique(data(:,8))';        %Should only be block 4, or none.
@@ -136,7 +136,7 @@ if any(data(:,8)>2)
         trialsPerContrast2(c) = length(data2(data2(:,2)==ii & data2(:,8)==b,2));
 
 
-        if trialsPerContrast2(c) < 0.025*length(data2(data2(:,8)==b,2))
+        if trialsPerContrast2(c) < 0.05*length(data2(data2(:,8)==b,2))
         includeContrast2(c) = 0;
         end
         c=c+1;
