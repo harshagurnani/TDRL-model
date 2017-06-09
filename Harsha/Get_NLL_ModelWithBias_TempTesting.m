@@ -2,7 +2,7 @@ function [NLL, NLL_L, NLL_R] = Get_NLL_ModelWithBias_TempTesting(params,Data, in
 
 %%% changed calculation of PC - use mean across iterations rather than mode
 %%% response.
-%data = Data.data;
+data = Data.data;
 
 alpha     = params(1);  % learning rate
 da_val    = params(2);  % value of DA

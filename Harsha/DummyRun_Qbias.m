@@ -71,8 +71,8 @@ for iter = 1:nIters
       Belief = normpdf(Bstimuli,stimResp,noiseSTD);
       Belief = Belief./sum(Belief);
       
-      Belief_L = sum(Belief(Bstimuli<0));
-      Belief_R = sum(Belief(Bstimuli>=0));
+      Belief_L = sum(Belief(Bstimuli<0)) + Belief(Bstimuli==0)/2;
+      Belief_R = sum(Belief(Bstimuli>0)) + Belief(Bstimuli==0)/2;
       
       % Q-values "Expected reward"
       QL(trial, iter) = Belief_L * QLL + Belief_R * QRL;

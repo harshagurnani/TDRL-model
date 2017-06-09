@@ -52,7 +52,7 @@ easystim = [ min(stimuli)                max(stimuli) ];           %Highest cont
 diffstim = [ max(stimuli(stimuli<0))  0  min(stimuli(stimuli>0)) ];%Lowest contrasts
 
 IsStimEasy = (dataGiven(:,2)<=easystim(1) | dataGiven(:,2)>=easystim(2));
-IsStimDiff = (dataGiven(:,2)>=diffstim(1) & dataGiven(:,2)<=diffstim(2));
+IsStimDiff = (dataGiven(:,2)>=1.2*diffstim(1) & dataGiven(:,2)<=diffstim(2));
 
 %%% checking shape of array
 IsStimEasy = reshape( IsStimEasy, [ length(dataGiven), 1 ]);
@@ -73,7 +73,7 @@ for iter = 1:nIters
     data(:,10) = correct(:, iter);
     
     
-    
+    b=0;
     for blockID = blocks
        b=b+1;
 
@@ -90,18 +90,18 @@ for iter = 1:nIters
 
           %After/Before easy stim + dopamine.
 
-          id= [false;data(2:end,2)==istim  & data(2:end,2)==blockID & data(2:end,7) < 5 & ... current trial
+          id= [false;data(2:end,2)==istim  & data(2:end,8)==blockID & data(2:end,7) < 5 & ... current trial
               DopTrial(1:end-1,1) & data(1:end-1,10)==1  & IsStimEasy(1:end-1)];            % conditioning trial
            per_mice_next(c,blockID,1,iter)= nanmean(data(id,3)) ;
-          id= [data(1:end-1,2)==istim & data(1:end-1,2)==blockID & data(1:end-1,7) < 5 & ...
+          id= [data(1:end-1,2)==istim & data(1:end-1,8)==blockID & data(1:end-1,7) < 5 & ...
              DopTrial(2:end,1) & data(2:end,10)==1       & IsStimEasy(2:end); false];
            per_mice_prev(c,blockID,1,iter)= nanmean(data(id,3)) ;
 
           %After/Before difficult stim + dopamine
-          id= [false;data(2:end,2)==istim & data(2:end,2)==blockID & data(2:end,7) < 5 & ...
-              DopTrial(1:end-1,1,iter) & data(1:end-1,10)==1  & IsStimDiff(1:end-1)];
+          id= [false;data(2:end,2)==istim & data(2:end,8)==blockID & data(2:end,7) < 5 & ...
+              DopTrial(1:end-1,1) & data(1:end-1,10)==1  & IsStimDiff(1:end-1)];
            per_mice_next(c,blockID,2)= nanmean(data(id,3)) ;
-          id= [data(1:end-1,2)==istim & data(1:end-1,2)==blockID & data(1:end-1,7) < 5 & ...
+          id= [data(1:end-1,2)==istim & data(1:end-1,8)==blockID & data(1:end-1,7) < 5 & ...
               DopTrial(2:end,1) & data(2:end,10)==1      & IsStimDiff(2:end); false];
            per_mice_prev(c,blockID,2,iter)= nanmean(data(id,3)) ;
 
