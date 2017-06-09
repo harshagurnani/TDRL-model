@@ -181,7 +181,12 @@ for j=unique(data(:,8))'
       
       nn(c) = length(data(data(:,2)==i & data(:,8)==j,2));                          % Total number of trials
       pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);     % Observed P(R)
-      probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
+%       probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
+      probs(c) = 0;
+      for iter = 1:iterN
+        probs(c) = probs(c) + length(data(data(:,2)==i & data(:,8)==j & action(:, iter)==1,2))/nn(c); % Estimated P(R) for each stimulus
+      end
+      probs(c) = probs(c)/iterN;
       
       %Trials after correct left choices
       id = [false; data(2:end,2)==i & data(2:end,8)==j                    & data(1:end-1,3)==-1  &  data(1:end-1,10)==1];

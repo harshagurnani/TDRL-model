@@ -1,6 +1,8 @@
 function [NLL, NLL_L, NLL_R] = Get_NLL_ModelWithBias_TempTesting(params,Data, includeContrast, varargin)
 
-data = Data.data;
+%%% changed calculation of PC - use mean across iterations rather than mode
+%%% response.
+%data = Data.data;
 
 alpha     = params(1);  % learning rate
 da_val    = params(2);  % value of DA
@@ -74,12 +76,12 @@ parfor iter = 1:iterN
       % define Belief_L and Belief_R
       % corresponds to the model's belief about side of stimulus
       % Belief_L + Belief_R = 1
-      Belief_L=sum(Belief(1:floor(contrastNum/2)));
-      Belief_R=sum(Belief(floor(contrastNum/2)+1:end));
+      Belief_L=sum(Belief(contrast < 0))+Belief(contrast==0)/2;
+      Belief_R=sum(Belief(contrast>0))+Belief(contrast==0)/2;
       
       %initialise Q values for this iteration
       QL(trials,iter) = Belief_L*QLL + Belief_R*QRL;
-      QR(trials,iter) = Belief_L*QLR + Belief_R*QRR     ;    
+      QR(trials,iter) = Belief_L*QLR + Belief_R*QRR;    
       
       
       % action based on model (action <-- max(QL,QR))
@@ -181,7 +183,11 @@ for j=unique(data(:,8))'
       
       nn(c) = length(data(data(:,2)==i & data(:,8)==j,2));                          % Total number of trials
       pp(c) = length(data(data(:,2)==i & data(:,8)==j & data(:,3)==1,2))/nn(c);     % Observed P(R)
-      probs(c) = length(data(data(:,2)==i & data(:,8)==j & modeAction==1,2))/nn(c); % Estimated P(R) for each stimulus
+      probs(c) = 0;
+      for iter = 1:iterN
+        probs(c) = probs(c) + length(data(data(:,2)==i & data(:,8)==j & action(:, iter)==1,2))/nn(c); % Estimated P(R) for each stimulus
+      end
+      probs(c) = probs(c)/iterN;
       
       %Trials after correct left choices
       id = [false; data(2:end,2)==i & data(2:end,8)==j                    & data(1:end-1,3)==-1  &  data(1:end-1,10)==1];
