@@ -1,5 +1,5 @@
 function [ stimuli, shifts ] = CondPsychCurves_StimLevel_and_Correct( TStimuli, TBlocks, action, correct, varargin )
-%% Shift in P(R) after dopamine reward on easy versus difficult stimuli
+%% Shift in P(R) after dopamine reward on easy versus difficult stimuli - separate arguments
 
     nTrials = length(TStimuli);
     nIters = size(action,2);
@@ -105,7 +105,7 @@ function [ stimuli, shifts ] = CondPsychCurves_StimLevel_and_Correct( TStimuli, 
 
    end
    end
-   shifts = PC_next(:,ic,:,:) - PC_prev(:,ic,:,:);
+   shifts = nanmean(PC_next(:,ic,:,:) - PC_prev(:,ic,:,:),4);
    
    if toplot
         if newfig
@@ -127,6 +127,8 @@ function [ stimuli, shifts ] = CondPsychCurves_StimLevel_and_Correct( TStimuli, 
         mLabel{2*b-1} = sprintf(' %s - After Easy Stim', blockLabel{blockID});                          
         mLabel{2*b}   = sprintf(' %s - After Diff Stim', blockLabel{blockID});                          
         end
+        ylabel('P(R)')
+        xlabel('Stimulus')
         legend(h, mLabel{:})
    end
 

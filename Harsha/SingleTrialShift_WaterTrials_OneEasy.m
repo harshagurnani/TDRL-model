@@ -65,6 +65,9 @@ function [ shifts ] = SingleTrialShift_WaterTrials_OneEasy( dataGiven , varargin
                stimID = 2;
            end
 %            if any(isnan(shifts(stimID, :, b, AID)))
+           % some iterations/stimuli don't have enough trials and end up as
+           % NaNs. 
+           % check this separately for reward/omission
            if isnan(shifts(stimID, 1, b, AID))
                tmp = nextChoice{1}( :, jj) - prevChoice{1}(:, jj);
 %                if ~any(isnan(tmp))

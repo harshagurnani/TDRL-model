@@ -1,28 +1,34 @@
  function AllThePlots_Bigger_TempTesting(Data, data_modelAll, actionAll, correctAll, xanswerMin, includeContrast, NLLData, varargin)
 
- % 1 - (Left) Psychometric curves of blocks 1 and 2. (Right) Details of parameters fit
+ % 1 - (Left) Psychometric curves of blocks 1 and 2. (Middle) Percent match for top 5 models (Right) Details of parameters fit
  % 2 -  Model and experimental P(R) sliding over all sessions
  % 3 -  NLL : (Left) Alpha v/s Noise  (Middle) DA v/s Noise  (Right) Bias v/s Noise
  % 
  % If blocks 3/4 present:
  % 4 - (Left/centre) Conditional psychometric curves of Block 3/4 (Right) Alpha with DA conditional NLL
  % 
- % 4/5 - (Left) Percent match for top 5 models  (Middle) Shifts after easy/difficult stimuli - mouse and model. (Right) Percent shift in P(R) of expt and top 5 models
+ % 4/5 - (Left) Shifts after easy/difficult stimuli - mouse and model. (Right) Sifts after DA/water reward and error - mouse and model
  % Combining all the plots we have
 
 data_mice = Data.data;
-animalID = Data.ID;
+animalID  = Data.ID;
 
-% changing y-axis values
-data_mice(:,3) = (1 + data_mice(:,3)) ./ 2;
+% changing ACTION values to 0 and 1
+if any(data_mice(:,3)==-1)
+data_mice(:,3)        = (1 + data_mice(:,3)) ./ 2;
+end
+if any(data_modelAll(:,22,1)==-1)
 data_modelAll(:,16,:) = (1 + data_modelAll(:,16,:)) ./ 2;
 data_modelAll(:,22,:) = (1 + data_modelAll(:,22,:)) ./ 2;
+end
+if any(actionAll(:,1,1)==-1)
 actionAll = ( 1 + actionAll) ./2;
+end
 
 % Best model
 data_model = squeeze(data_modelAll(:,:,1));      
-action = actionAll(:,:,1);
-correct = correctAll(:,:,1);
+action     = actionAll(:,:,1);
+correct    = correctAll(:,:,1);
 
 nModels = size(data_modelAll, 3);
 nTrials = size(data_modelAll,1);
@@ -34,7 +40,7 @@ markerShape = {'o', 's', '^', 'v'};
 BlockLabels = {'DA-L', 'DA-R','DA-Both', 'No DA'}; 
 
 if any(data_mice(:,8)>2)
-    % Block 3/4 present
+% Block 3/4 present
     nrows = 5;
 else
     nrows = 4;
@@ -62,10 +68,10 @@ params2     = NLLData.top5params;
 full = figure;
 
 %-------------------------------------------------------------------------%
-%% PLOT 1 - (Left) Psychometric curves of blocks 1 and 2. (Right) Details of parameters fit
+%% PLOT 1 - MODEL DETAILS  
 %-------------------------------------------------------------------------%
 
-%% -------------- Left -----------------------------------------------------%
+%% -------- (Left) Psychometric curves of blocks 1 and 2 ----------------%
 subplot(nrows, 2, 1 ); hold on;
 blocks = [ 1 2];
 b=0;
@@ -122,10 +128,15 @@ title('Psychometric curves from Data and Best Model')
 
 %% ----- (Middle) Percent match for top 5 models --------------%
 PMatch = nan(nIters, nModels);
+PMatch2 = nan(nIters, nModels);     % match on non-zero contrasts
 PMatch_mode = nan(nModels,1);
+id = (data_mice(:,2) ~= 0  );
+nCTrials = sum(id);
 for model = 1:nModels
     for jj=1:nIters
-      PMatch(jj, model) = sum( data_mice(:,3) == actionAll(:, jj,model) )/nTrials; 
+      PMatch(jj, model)  = sum( data_mice(:,3) == actionAll(:, jj,model) )/nTrials; 
+      PMatch2(jj, model) = sum( data_mice(id,3) == actionAll(id, jj,model) )/nCTrials; 
+
     end
     PMatch_mode(model) = sum(data_mice(:,3) == data_modelAll(:,16,model))/nTrials;
 end
@@ -133,16 +144,20 @@ end
 subplot(nrows,4,3); hold on
 
 h = zeros(2,1);
+%%% only plotting mean percent match for ALL trials
 h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10,'linestyle','none');
+% h(2) = plot(1:nModels, mean(PMatch,1), 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10,'linestyle','none');
 % h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
 for jj=1:nIters
     plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
+%     plot(1:nModels, PMatch2(jj,:),'marker', 's', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
 end
-legend(h(1), 'Mean Percent Match of responses')%, 'Percent match of mode response')
+legend(h(1), 'Mean Percent Match of responses');
+% legend(h, 'Mean Percent Match of responses', 'Percent response match for non-zero contrast trials')%, 'Percent match of mode response')
 set(gca, 'xtick', 1:nModels);
 xlabel( 'Model number')
 
-%% ---------------------- Right --------------------------------------------%
+%% ------------ (Right) Details of parameters fit ------------------------%
 % put all the explanation in this subplot
 subplot(nrows,4,4); hold on;
 set(gca,'visible','off');
@@ -163,12 +178,11 @@ text(.55,0.9,descr2)
 %% PLOT 2 -  Model and experimental P(R) sliding over all sessions
 %-------------------------------------------------------------------------%
 
-
 subplot(nrows,1,2,'Parent',full);  hold on
 
 plotLen = nTrials;
-mouse = data_mice(:,3) ;
-model = data_model(:,22);
+mouse   = data_mice(:,3) ;
+model   = data_model(:,22);
 
 % Y Lim of choices put between 0.02 and 0.98
 smoothmouse = mouse*0.96 + 0.02;
@@ -212,7 +226,7 @@ ylabel('Fraction\newlinerightward choice')
 set(gca,'visible','on');
 
 %-------------------------------------------------------------------------%
-%% PLOT 3 - NLL : (Left) Alpha v/s Noise  (Middle) DA v/s Noise  (Right) Bias v/s Noise
+%% PLOT 3 - NLL of conditional Psychometric curves
 %-------------------------------------------------------------------------%
 
 subplot(nrows,1,3)
@@ -299,7 +313,7 @@ ylabel(yData)
 %-------------------------------------------------------------------------%
 if any(data_mice(:,8)>2)
 %-- (Left) Conditional Psychometric curves after Left and Right choices
-subplot( nrows, 2, 7); hold on;
+   subplot( nrows, 2, 7); hold on;
 
    % Block 3/4 present
    blocks = unique(data_mice(data_mice(:,8)>2,8))'; 
@@ -429,6 +443,8 @@ model = 1; % only compare best model
 % shift
 [ stimuli_M, mouse_shift_allstim, mouse_ED_PC, mouse_ED_IC ] = SingleTrialShift_EasyDiffStim_with_Dop( data_mice );
 [ stimuli_m, model_shift_allstim, model_ED_PC, model_ED_IC ] = SingleTrialShift_EasyDiffStim_with_Dop( squeeze(data_modelAll(:,:,model)), squeeze(actionAll(:,:,model)), squeeze(correctAll(:,:,model))  );
+PlotShift = max(stimuli_M);
+
 
 subplot(nrows,2,2*nrows-1); hold on
 h=zeros(8+1,1);
@@ -450,22 +466,23 @@ MLabel{5} = '';
 
 % PLOT BEST MODEL
 model = 1; % only plot model 1 
-h(6) = plot( 1.5 + stimuli_m, nanmean(model_shift_allstim(:,1,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markerfacecolor', 0.5*[1 1 1],'markersize', 5, 'linestyle', ':',  'linewidth',2) ;
-h(7) = plot( 1.5 + stimuli_m, nanmean(model_shift_allstim(:,1,2,:),4),  'color', 'cyan',      'marker', 's',  'markerfacecolor', 'cyan',     'markersize', 5, 'linestyle', '-',  'linewidth',2) ;
+h(6) = plot( 1+PlotShift + stimuli_m, nanmean(model_shift_allstim(:,1,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markerfacecolor', 0.5*[1 1 1],'markersize', 5, 'linestyle', ':',  'linewidth',2) ;
+h(7) = plot( 1+PlotShift + stimuli_m, nanmean(model_shift_allstim(:,1,2,:),4),  'color', 'cyan',      'marker', 's',  'markerfacecolor', 'cyan',     'markersize', 5, 'linestyle', '-',  'linewidth',2) ;
                 
-h(8) = plot( 1.5 + stimuli_m, nanmean(model_shift_allstim(:,2,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markerfacecolor', 0.5*[1 1 1],'markersize', 5, 'linestyle', '--', 'linewidth',2) ;
-h(9) = plot( 1.5 + stimuli_m, nanmean(model_shift_allstim(:,2,2,:),4),  'color', 'm',         'marker', 's',  'markerfacecolor', 'm',        'markersize', 5, 'linestyle', '-', 'linewidth',2) ;
+h(8) = plot( 1+PlotShift + stimuli_m, nanmean(model_shift_allstim(:,2,1,:),4),  'color', 0.5*[1 1 1], 'marker', 's',  'markerfacecolor', 0.5*[1 1 1],'markersize', 5, 'linestyle', '--', 'linewidth',2) ;
+h(9) = plot( 1+PlotShift + stimuli_m, nanmean(model_shift_allstim(:,2,2,:),4),  'color', 'm',         'marker', 's',  'markerfacecolor', 'm',        'markersize', 5, 'linestyle', '-', 'linewidth',2) ;
                 
 MLabel{6} = sprintf('Model %d - Easy Stim in DA-L', model);
 MLabel{7} = 'Diff stim in DA-L';
 MLabel{8} = 'Easy stim in DA-R';
 MLabel{9} = 'Diff stim in DA-R';
-xlim([min(stimuli_m)-0.2 1.5+ max(stimuli_m)+0.5])
+
+xlim([min(stimuli_m)-0.2 1+PlotShift+ max(stimuli_m)+PlotShift])
 ylim( [-max(abs(mouse_shift_allstim(:)))-0.1 max(abs(mouse_shift_allstim(:)))+0.1])
 ylabel('Change in P(R)')
 xlabel('Stimulus')
 legend(h, MLabel{:}, 'Location', 'NorthEast');
-set(gca, 'xtick', ([stimuli_M(2:2:end), 1.5+stimuli_M(2:2:end)]), 'xticklabel',string([stimuli_M(2:2:end), stimuli_M(2:2:end)]) )
+set(gca, 'xtick', ([stimuli_M(2:2:end), 1+PlotShift+stimuli_M(2:2:end)]), 'xticklabel',string([stimuli_M(2:2:end), stimuli_M(2:2:end)]) )
 
 %% ------------ (Right) Single Trial Shift (STS) after Dopamine or Water Reward and Omission ----%
 

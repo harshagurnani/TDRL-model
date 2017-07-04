@@ -1,5 +1,12 @@
-function [NLL, NLL_L, NLL_R] = Get_NLL_ModelWithBias_TempTesting2(params,Data, includeContrast, varargin)
-%% new bias and new belief computation
+function [NLL, NLL_L, NLL_R] = Get_NLL_ModelWithBias_TempTesting2(params, Data, includeContrast, varargin)
+%% 4 Parameter Model - Learning rate, Dopamine Value, Sensory Noise, Action Bias
+
+%%% NEW CHANGES:
+%%% changed calculation of PC - use mean across iterations rather than mode
+%%% response.
+%%% belief is calculated at a grid of stimuli, not necessarily the ones seen by the animal, 
+%%% but prob density at zero contrast is shared between Left and Right
+
 data = Data.data;
 
 alpha     = params(1);  % learning rate
@@ -20,8 +27,8 @@ reward = [  1+da_val , 1         , 1+da_val, 1;
 contrastTrials = data(:,2);
 contrast = unique(data(:,2))';
 contrastNum = length(contrast);
-Bstimuli =[-max(0.5, max(contrast)):0.05:max(0.5, max(contrast))];
 
+Bstimuli = [ - max(0.5, max(contrast)): 0.05: max(0.5, max(contrast)) ];
 
 
 %% initialise
@@ -34,10 +41,10 @@ trialN = length(contrastTrials);
 
 
 % initialise variables, for speed
-action = nan(trialN,iterN);
-QL = nan (trialN,iterN);
-QR = nan (trialN,iterN);
+action  = nan(trialN,iterN);
 correct = nan(trialN,iterN);
+QL      = nan(trialN,iterN);
+QR      = nan(trialN,iterN);
 
 parfor iter = 1:iterN
    
@@ -52,7 +59,7 @@ parfor iter = 1:iterN
       
       % at the onset of the day initialise Q values..but don't initialise
       % if sessions ran in one day
-      if data (trials, 11) ==1 && data (trials, 1) ==1
+      if data(trials, 11) ==1 && data(trials, 1) ==1
          
          QLL = 1;
          QRR = 1;
@@ -74,8 +81,8 @@ parfor iter = 1:iterN
       % define Belief_L and Belief_R
       % corresponds to the model's belief about side of stimulus
       % Belief_L + Belief_R = 1
-      Belief_L=sum(Belief(Bstimuli < 0))+Belief(Bstimuli==0)/2;
-      Belief_R=sum(Belief(Bstimuli >0))+Belief(Bstimuli==0)/2;
+      Belief_L=sum(Belief(Bstimuli < 0)) +Belief(Bstimuli==0)/2;
+      Belief_R=sum(Belief(Bstimuli > 0)) +Belief(Bstimuli==0)/2;
       
       %initialise Q values for this iteration
       QL(trials,iter) = Belief_L*QLL + Belief_R*QRL;
@@ -114,15 +121,15 @@ parfor iter = 1:iterN
       elseif currentContrast==0
          
          if rand > 0.5
-            
+            correct(trials,iter) = 1; 
             if action(trials,iter)==-1
-               
-               correct(trials,iter) = 1; %-------------------- correct = -1???
+%                
+%                correct(trials,iter) = 1; %-------------------- correct = -1???
                Reward = reward(1,data(trials,8));
                
             elseif action(trials,iter)==1
                
-               correct(trials,iter) = 1;
+%                correct(trials,iter) = 1;
                Reward = reward(2,data(trials,8));
                
             end
@@ -241,7 +248,7 @@ contrastToUse = (includeContrast==1);
 % - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
 %           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
 % Constant K is constant for all simulations so only need to maximise second term 
-NLL = - sum(nn(contrastToUse).*(pp(contrastToUse).*log(probs(contrastToUse))+(1-pp(contrastToUse)).*log(1-probs(contrastToUse))));
+NLL   = - sum(nn(contrastToUse).*(pp(contrastToUse).*log(probs(contrastToUse))+(1-pp(contrastToUse)).*log(1-probs(contrastToUse))));
 NLL_L = - sum(nn_L(contrastToUse).*(pp_L(contrastToUse).*log(probs_L(contrastToUse))+(1-pp_L(contrastToUse)).*log(1-probs_L(contrastToUse))));
 NLL_R = - sum(nn_R(contrastToUse).*(pp_R(contrastToUse).*log(probs_R(contrastToUse))+(1-pp_R(contrastToUse)).*log(1-probs_R(contrastToUse))));
 

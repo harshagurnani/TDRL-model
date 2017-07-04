@@ -1,13 +1,13 @@
-function [ TrialStimuli, TrialBlocks, action, correct, QL, QR ] = DummyRun( params )
+function [ TrialStimuli, TrialBlocks, action, correct, QL, QR ] = DummyRun_WithLapse( params )
 % Run model with parameters for fake stimuli
 % shifts after diff/easy stimuli
 
-
+% PARAMS
 alpha = params(1);
 DA_val = params(2);
 noiseSTD = params(3);
 Qbias = params(4);
-
+lambda = params(5)
 
 stimuli = [-0.5 -0.25 -0.12 -0.05 0 0.05 0.12 0.25 0.5]';
 nStimuli = length(stimuli);
@@ -33,13 +33,13 @@ end
 BlockReward = [1+DA_val,     1   , 1+DA_val, 1;
                    1   , 1+DA_val, 1+DA_val, 1 ];
         
-
+% New days
 action = nan( nTrials, nIters);
 correct = zeros(nTrials, nIters);
 newDay = zeros( nTrials,1);
-for jj=2001:nTrials
-   if sum(newDay(jj-1000:jj-1)) == 0
-       if rand<0.003
+for jj=501:nTrials
+   if sum(newDay(jj-500:jj-1)) == 0
+       if rand<0.0025
           newDay(jj) = 1;  
        end
    end
@@ -79,24 +79,33 @@ for iter = 1:nIters
       QR(trial, iter) = Belief_L * QLR + Belief_R * QRR;
       
       % Action
-      
-      if QL(trial, iter) > QR(trial, iter) + Qbias
-          % left more valuable
-          action(trial, iter) = -1;
+      if rand < lamda
+          % Lapse to block's default
+          switch BlockID
+              case 1
+                  action(trial, iter) = -1;
+              case 2
+                  action(trial, iter) = 1
+          end
           
-      elseif QL(trial, iter) < QR(trial, iter) + Qbias
-          % right more valuable
-          action(trial, iter) = 1;
-          
-      else
-        % Random action
-        if rand< 0.5
-            action(trial, iter) = -1;
-        else 
-            action(trial, iter) = 1;
-        end
+          if QL(trial, iter) > QR(trial, iter) + Qbias
+              % left more valuable
+              action(trial, iter) = -1;
+
+          elseif QL(trial, iter) < QR(trial, iter) + Qbias
+              % right more valuable
+              action(trial, iter) = 1;
+
+          else
+            % Random action
+            if rand< 0.5
+                action(trial, iter) = -1;
+            else 
+                action(trial, iter) = 1;
+            end
+          end
+
       end
-      
       
       % correct or error
       if TrialStimuli(trial) < 0  &&  action(trial, iter) == -1

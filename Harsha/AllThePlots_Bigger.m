@@ -397,15 +397,15 @@ for model = 1:nModels
     PMatch_mode(model) = sum(data_mice(:,3) == data_modelAll(:,16,model))/nTrials;
 end
 
-subplot(nrows,2,2*nrows-1); hold on
+subplot(nrows,3,3*nrows-2); hold on
 
 h = zeros(2,1);
-h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10);
-h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
+h(1) = plot(1:nModels, mean(PMatch,1), 'color', 'r', 'marker', 'o', 'markerfacecolor','r', 'markersize', 10,'linestyle','none');
+% h(2) = plot(1:nModels, PMatch_mode, 'color', 'cyan', 'marker', 'o', 'markerfacecolor','cyan', 'markersize', 10);
 for jj=1:nIters
     plot(1:nModels, PMatch(jj,:), 'marker', '*', 'markerfacecolor', 'k', 'linestyle','none', 'markersize',4);
 end
-legend(h, 'Mean Percent Match of responses', 'Percent match of mode response')
+legend(h(1), 'Mean Percent Match of responses')%, 'Percent match of mode response')
 
 
 
@@ -428,7 +428,7 @@ for model = 1:5
 end
 %model - [stimulus, iter, modelNumber], Mice - [stimulus]
 
-subplot(nrows,2,2*nrows); hold on
+subplot(nrows,3,3*nrows-1); hold on
 h=zeros(2+2*2,1);
 blueminus = 0.4;
 h(1) = plot( -2:2, mouse_dopreward_STS, 'color', [0 0.5 0], 'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-', 'linewidth',2) ;

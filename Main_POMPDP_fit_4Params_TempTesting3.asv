@@ -16,13 +16,13 @@
 %Initialisation
 % set model parameter values
 alpha       = 0.03 : 0.07 : 0.7;     % learning rate
-DA_val      = -4 : 0.5 : 1 ;         % dopamine value
+DA_val      = 0 : 0.5 : 6.0;         % dopamine value
 noiseSTD    = 0.02 : 0.02 : 0.52;    % noise in belief
-Qbias       = -0.3 : 0.05 : 0.3;     % bias in Q-value
+beta       = -0.3 : 0.05 : 0.3;      % bias in Q-value
 % Qbias       = -0.8 : 0.05 : 0.8;     
 
 % load in animal data if not already present
-AnimalID='ALK016'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK017'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 ExpID = '1';
 
@@ -85,7 +85,7 @@ for bb=1:length(Qbias)
          params(4) = Qbias(bb);
          counter = counter + 1;
          
-         [Fval, ~,~] = Get_NLL_ModelWithBias_TempTesting2(params, Data,  includeContrast, iterN);
+         [Fval, ~,~] = Get_NLL_ModelWithBias_TempTesting(params, Data,  includeContrast, iterN);
          xanswerStore(counter,:) = params;
          FvalStore(ii,jj,kk,bb)  = Fval;
       end
@@ -154,7 +154,7 @@ if any(data(:,8)>2)
              params(3) = noiseSTD_new(kk);
              params(4) = Qbias_new(kk);
              counter = counter + 1;
-             [Fval, Fval_l, Fval_r] = Get_NLL_ModelWithBias_TempTesting2(params, Data2, includeContrast2, iterN);
+             [Fval, Fval_l, Fval_r] = Get_NLL_ModelWithBias_TempTesting(params, Data2, includeContrast2, iterN);
              xanswerStore2(counter,:,kk) = params;
              FvalStore2(ii,kk)   = Fval;
              FvalStore2_L(ii,kk) = Fval_l;

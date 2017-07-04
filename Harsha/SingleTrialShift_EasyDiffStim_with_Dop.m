@@ -52,7 +52,7 @@ easystim = [ min(stimuli)                max(stimuli) ];           %Highest cont
 diffstim = [ max(stimuli(stimuli<0))  0  min(stimuli(stimuli>0)) ];%Lowest contrasts
 
 IsStimEasy = (dataGiven(:,2)<=easystim(1) | dataGiven(:,2)>=easystim(2));
-IsStimDiff = (dataGiven(:,2)>=1.2*diffstim(1) & dataGiven(:,2)<=diffstim(2));
+IsStimDiff = (dataGiven(:,2)>=diffstim(1) & dataGiven(:,2)<=diffstim(2));
 
 %%% checking shape of array
 IsStimEasy = reshape( IsStimEasy, [ length(dataGiven), 1 ]);

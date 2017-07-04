@@ -1,18 +1,28 @@
-function [ TrialStimuli, TrialBlocks, action, correct, QL, QR ] = DummyRun( params )
+function [ TrialStimuli, TrialBlocks, action, correct, QL, QR ] = DummyRun_noisyBelief( params )
 % Run model with parameters for fake stimuli
-% shifts after diff/easy stimuli
+% Belief becomes noisy on one side stimuli
 
 
-alpha = params(1);
-DA_val = params(2);
-noiseSTD = params(3);
-Qbias = params(4);
+alpha       = params(1);
+DA_val      = params(2);
+noiseSTD    = params(3);
+Qbias       = params(4);
 
+StimSide    = sign(params(5));
+sigmaChange = abs(params(5));
+if StimSide == 1
+    noiseBL = noiseSTD;
+    noiseBR = sigmaChange*noiseSTD;
+else
+    noiseBL = sigmaChange*noiseSTD;
+    noiseBR = noiseSTD;
+end
+noise0 = sqrt( (noiseBL^2 + noiseBR^2)/2 );
 
-stimuli = [-0.5 -0.25 -0.12 -0.05 0 0.05 0.12 0.25 0.5]';
-nStimuli = length(stimuli);
-nTrials = 30000;
-nIters = 99;
+stimuli     = [-0.5 -0.25 -0.12 -0.05 0 0.05 0.12 0.25 0.5]';
+nStimuli    = length(stimuli);
+nTrials     = 10000;
+nIters      = 10;
 
 %Generate random stims
 TrialStimuli = stimuli( unidrnd( nStimuli, [nTrials,1]) );
@@ -46,21 +56,29 @@ for jj=2001:nTrials
 end
 
 Bstimuli = [min(stimuli):0.02:max(stimuli)];
-
-Bstimuli = [-1:0.02:1];
-Bstimuli  = stimuli;
+Belief = nan(size(Bstimuli));
+% Bstimuli = [-1:0.02:1];
+% Bstimuli  = stimuli;
 QL = nan(nTrials, nIters); QR = QL;
-
 % Run model
+
+nSteps = 1;     %no. of trials that stim lasts
 for iter = 1:nIters
    QLL = 1; QLR = 1; QRL = 1; QRR = 1;
+   noiseBL_trial = noiseSTD; noiseBR_trial = noiseSTD; noise0_trial = noiseSTD;
+   laser = nSteps;
+   reset = 1;
    for trial = 1:nTrials
       if newDay(trial) == 1
           QLL = 1; QLR = 1; QRL = 1; QRR = 1;
       end
       BlockID = TrialBlocks(trial);
       reward = BlockReward(:, BlockID);
-      
+%       laser = laser+1;
+      if laser >= nSteps && reset==0
+             noiseBL_trial = noiseSTD; noiseBR_trial = noiseSTD; noise0_trial = noiseSTD;
+             reset = 1;
+      end
       % default - no reward unless correct action
       rewardGiven = 0;
       
@@ -68,7 +86,9 @@ for iter = 1:nIters
       stimResp = randn*noiseSTD + TrialStimuli(trial);
       
       %Belief state
-      Belief = normpdf(Bstimuli,stimResp,noiseSTD);
+      Belief(Bstimuli <0) = normpdf(Bstimuli(Bstimuli <0),stimResp,noiseBL_trial);
+      Belief(Bstimuli >0) = normpdf(Bstimuli(Bstimuli >0),stimResp,noiseBR_trial);
+      Belief(Bstimuli==0) = normpdf(0,stimResp,noise0_trial);
       Belief = Belief./sum(Belief);
       
       Belief_L = sum(Belief(Bstimuli<0)) + 0.5*Belief(Bstimuli==0);
@@ -103,19 +123,45 @@ for iter = 1:nIters
         %Correct left action
         correct( trial, iter) = 1;
         rewardGiven = reward(1);
-            
-         
+        if TrialBlocks(trial) == 1
+            noiseBL_trial = noiseBL;
+            noiseBR_trial = noiseBR;
+            noise0_trial = noise0;
+            laser = 0;    
+            reset = 0;
+        else
+            laser = laser+1;
+        end
       elseif TrialStimuli(trial) > 0 && action(trial, iter) == 1
         % Correct Right action
         correct(trial, iter) = 1;
         rewardGiven = reward(2);
-        
+        if TrialBlocks(trial) == 2
+            noiseBL_trial = noiseBL;
+            noiseBR_trial = noiseBR;
+            noise0_trial = noise0;
+            laser = 0;    
+            reset = 0;
+        else
+            laser = laser+1;
+        end
       elseif TrialStimuli(trial) == 0
          if rand() < 0.5
              % Correct randomly
              rewardGiven =  reward( 1+ (action(trial,iter)==1) );
              correct( trial,iter) = 1;
+            if 2*(TrialBlocks(trial))-3 == action(trial,iter)
+                noiseBL_trial = noiseBL;
+                noiseBR_trial = noiseBR;
+                noise0_trial = noise0;
+                laser = 0;
+                reset = 0;
+            else
+                laser = laser+1;
+            end
          end
+      else
+          laser = laser+1;
       end
     
       if action(trial, iter) == -1

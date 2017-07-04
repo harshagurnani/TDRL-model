@@ -1,5 +1,5 @@
 function [ contrasts, shift] = CondPsychCurves_AfterWater( TStimuli, TBlocks, action, correct, varargin )
-
+%% Returns shifts. Conditional to Water reward or error - with separate arguments
     nTrials = length(TStimuli);
     nIters = size(action,2);
     
@@ -24,7 +24,7 @@ function [ contrasts, shift] = CondPsychCurves_AfterWater( TStimuli, TBlocks, ac
         action = (1 + action)/2;
     end
     
-    PC_next = zeros(  2, length(contrasts), length(blocks) );
+    PC_next = zeros(  2, length(contrasts), length(blocks), nIters );
     PC_prev = PC_next;
     shift = nan(  2, length(contrasts), length(blocks) );
     DopChoice = {1, 0, 2, [0 1]};
@@ -32,7 +32,7 @@ function [ contrasts, shift] = CondPsychCurves_AfterWater( TStimuli, TBlocks, ac
     b=0;
     for blockID = blocks
         b=b+1; c= 0;
-        DChoice = DopChoice{blockID}
+        DChoice = DopChoice{blockID};
         for stim = contrasts
         c= c+1;
         
@@ -44,32 +44,32 @@ function [ contrasts, shift] = CondPsychCurves_AfterWater( TStimuli, TBlocks, ac
         % After Dop Correct
             id = [false; TStimuli(2:end) == stim & TBlocks(2:end)==blockID & ...
                           DOPGiven(1:end-1) & correct(1:end-1, iter) == 1];
-            PC_next(1,c,b) = PC_next(1,c,b) + nanmean( action(id, iter) ); 
+            PC_next(1,c,b,iter) = nanmean( action(id, iter) ); 
             
         % Before Dop correct
             id = [TStimuli(1:end-1) == stim & TBlocks(1:end-1)==blockID & ...
                    DOPGiven(2:end) & correct(2:end, iter) == 1; false];
-            PC_prev(1,c,b) = PC_prev(1,c,b) + nanmean( action(id, iter) ); 
+            PC_prev(1,c,b,iter) = nanmean( action(id, iter) ); 
         
             
         % After Dop Error
             id = [false; TStimuli(2:end) == stim & TBlocks(2:end)==blockID & ...
                           DOPGiven(1:end-1) & correct(1:end-1, iter) == 0];
-            PC_next(2,c,b) = PC_next(2,c,b) + nanmean( action(id, iter) ); 
+            PC_next(2,c,b,iter) = nanmean( action(id, iter) ); 
             
         % Before Dop Error
             id = [TStimuli(1:end-1) == stim & TBlocks(1:end-1)==blockID & ...
                    DOPGiven(2:end) & correct(2:end, iter) == 0; false];
-            PC_prev(2,c,b) = PC_prev(2,c,b) + nanmean( action(id, iter) ); 
+            PC_prev(2,c,b,iter) = nanmean( action(id, iter) ); 
         end
 
         
         end
-    end
-    PC_next = PC_next./nIters;
-    PC_prev = PC_prev./nIters;
-    
-    shift = PC_next - PC_prev;
+%     end
+%     PC_next = PC_next./nIters;
+%     PC_prev = PC_prev./nIters;
+%     
+    shift = nanmean(PC_next - PC_prev,4);
     
     if toplot
 %        BlockColor = {'b', 'r', 'g', 'k'};

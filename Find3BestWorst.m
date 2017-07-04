@@ -1,5 +1,6 @@
 function [xanswerMin,xanswerMax] = Find3BestWorst(FvalStoreAll,xanswerStore, varargin)
-% Find the 3 best and 3 worst Fvals
+% Find the  best Fvals
+% no worst params calculation done yet.
 
 if nargin>2
     nanswers = varargin{1};
