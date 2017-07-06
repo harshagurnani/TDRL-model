@@ -42,7 +42,7 @@ BeepValue = nan (trialN,iterN);
 StimPE    = nan (trialN,iterN);
 delta     = nan (trialN,iterN);
  
-parfor iter = 1:iterN
+for iter = 1:iterN
    
    % initalise Q values for each iteration
    QLL(1,:) = 1;
@@ -79,9 +79,12 @@ parfor iter = 1:iterN
       % define Belief_L and Belief_R
       % corresponds to the model's belief about side of stimulus
       % Belief_L + Belief_R = 1
-      Belief_L=sum(Belief(contrast < 0))+Belief(contrast==0)/2;
-      Belief_R=sum(Belief(contrast > 0))+Belief(contrast==0)/2;
-      
+      Belief_L=sum(Belief(contrast < 0));%Belief(contrast==0)/2;
+      Belief_R=sum(Belief(contrast > 0));%Belief(contrast==0)/2;
+      if any(contrast==0)
+          Belief_L = Belief_L + Belief(contrast==0)/2;
+          Belief_R = Belief_R + Belief(contrast==0)/2;
+      end
       %initialise Q values for this iteration
       QL(trials,iter) = Belief_L*QLL + Belief_R*QRL  ;
       QR(trials,iter) = Belief_L*QLR + Belief_R*QRR  ;

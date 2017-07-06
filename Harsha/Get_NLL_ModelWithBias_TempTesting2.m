@@ -81,8 +81,12 @@ parfor iter = 1:iterN
       % define Belief_L and Belief_R
       % corresponds to the model's belief about side of stimulus
       % Belief_L + Belief_R = 1
-      Belief_L=sum(Belief(Bstimuli < 0)) +Belief(Bstimuli==0)/2;
-      Belief_R=sum(Belief(Bstimuli > 0)) +Belief(Bstimuli==0)/2;
+      Belief_L=sum(Belief(Bstimuli < 0));
+      Belief_R=sum(Belief(Bstimuli > 0));
+      if any(Bstimuli==0)
+          Belief_L = Belief_L +Belief(Bstimuli==0)/2;
+          Belief_R = Belief_R +Belief(Bstimuli==0)/2; 
+      end
       
       %initialise Q values for this iteration
       QL(trials,iter) = Belief_L*QLL + Belief_R*QRL;
