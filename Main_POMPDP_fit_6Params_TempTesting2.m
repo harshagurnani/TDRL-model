@@ -16,7 +16,7 @@
 %Initialisation
 % set model parameter values
 alpha       = 0.03 : 0.07 : 0.7;     % learning rate
-DA_val      = -4 : 0.5 : 1 ;          % dopamine value 
+DA_val      = 0: 0.5: 5 ;          % dopamine value 
 noiseSTD    = 0.02 : 0.02 : 0.52;    % noise in belief
 Qbias       = 0;    %-0.3 : 0.05 : 0.3;     % bias in Q-value
 lambdaL     = 0 :   0.05 : 0.3;       % Probability of lapse to left
