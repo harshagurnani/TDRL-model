@@ -40,7 +40,7 @@
 %Initialisation
 % set model parameter values
 alpha       = 0.03 : 0.07 : 0.7;     % learning rate
-DA_val      = -4 : 0.5 : 1 ;          % dopamine value 
+DA_val      = 0 : 0.5 : 4 ;          % dopamine value 
 noiseSTD    = 0.02 : 0.02 : 0.52;    % noise in belief
 Qbias       = -0.3 : 0.1 : 0.3;     % bias in Q-value
 lambdaL     = 0 :   0.05 : 0.3;       % Probability of lapse to left
@@ -49,7 +49,7 @@ nP = 6;
 % Qbias       = -0.8 : 0.05 : 0.8;     
 
 % load in animal data if not already present
-AnimalID='ALK035'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
+AnimalID='ALK016'; % 'SS031_DA' or 'SS040' or 'ALK05' or 'ALK011'
 % or 'ALK028' or 'ALK017'
 ExpID = '1';
 
@@ -128,7 +128,7 @@ end
 end
 % Minimize NLL to get best params
 nModels = 5;    % best 5 models
-[xanswerMin, ~] = Find3BestWorst(FvalStore,xanswerStore, nModels);
+[xanswerMin, ~] = FindTopModels(FvalStore,xanswerStore, nModels);
 
 %-------------------------------------------------------------------------%
 %% Step 2: If Block 3/4 exists, fit alpha again using conditional PC
@@ -200,7 +200,7 @@ if any(data(:,8)>2)
     end
     
     %% Find the best 5 alpha (+other parameters)
-    [xanswerMin2, ~] = Find3BestWorst(FvalStore2_L+FvalStore2_R, xanswerStore2, 1, true );
+    [xanswerMin2, ~] = FindTopModels(FvalStore2_L+FvalStore2_R, xanswerStore2, 1, true );
     xanswerMin2 = squeeze(permute( xanswerMin2, [3 2 1]));      % ONE alpha for each of top 5 models --> 5 new top models ON DIFF ROWS
     refinedAlpha = 1;
 else
