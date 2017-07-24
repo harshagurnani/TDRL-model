@@ -72,7 +72,7 @@ parfor iter = 1:iterN
          QRL = 1;
          
       end
-      
+      BlockID = data(trials, 8);
       numDATrials = numDATrials + 1;
       if numDATrials > TrialThresh
           lapserateL = 0;
@@ -288,7 +288,7 @@ contrastToUse = (includeContrast==1);
 % NLL = - Sum(log(P(c))
 % - log(P(c)) = - log(choose(nn,k)) -  nn*[ k/nn log(probs) + (nn-k)/nn log(1-probs) ]
 %           = CONSTANT K + nn*[ pp*log(probs) + (1-pp)*log(1-probs) ]
-% Constant K is constant for all simulations so only need to maximise second term 
+% Constant K is constant for all simulations so only need to minimise second term 
 NLL   = - sum(nn(contrastToUse).*(pp(contrastToUse).*log(probs(contrastToUse))+(1-pp(contrastToUse)).*log(1-probs(contrastToUse))));
 NLL_L = - sum(nn_L(contrastToUse).*(pp_L(contrastToUse).*log(probs_L(contrastToUse))+(1-pp_L(contrastToUse)).*log(1-probs_L(contrastToUse))));
 NLL_R = - sum(nn_R(contrastToUse).*(pp_R(contrastToUse).*log(probs_R(contrastToUse))+(1-pp_R(contrastToUse)).*log(1-probs_R(contrastToUse))));

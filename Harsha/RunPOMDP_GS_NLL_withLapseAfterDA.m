@@ -67,7 +67,7 @@ for iter = 1:iterN
          QRL = 1;
          
       end
-      
+      BlockID = data(trials, 8);
       numDATrials = numDATrials + 1;
       if numDATrials > TrialThresh
           lapserateL = 0;
