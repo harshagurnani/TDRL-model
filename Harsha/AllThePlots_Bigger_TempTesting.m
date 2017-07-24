@@ -123,6 +123,7 @@ h(b+2) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
 
 legend(h, BlockLabels{blocks},'Mouse','Model','Location','southeast');
 ylabel('Fraction rightward choice')
+ylim([0 1])
 xlabel('Contrast')
 title('Psychometric curves from Data and Best Model')
 
@@ -535,10 +536,10 @@ h=zeros(8+1,1);
 MLabel = cell(8+1,1);
 
 %%% PLOT MOUSE
-h(1) = plot( -2:2, mouse_dopreward_STS,                     'color', [0 0.5 0],   'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
-h(2) = plot( -2:2, mouse_doperror_STS,                      'color', 'r',         'marker', 'o', 'markerfacecolor', 'r',       'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
-h(3) = plot( -2:2, mouse_waterreward_STS,                   'color', [0 0.5 0],   'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
-h(4) = plot( -2:2, mouse_watererror_STS,                    'color', 'r',         'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
+h(1) = plot( -2:2, mouse_dopreward_STS,                            'color', [0 0.5 0],   'marker', 'o', 'markerfacecolor', [0 0.5 0], 'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+h(2) = plot( -2:2, mouse_doperror_STS,                             'color', 'r',         'marker', 'o', 'markerfacecolor', 'r',       'markersize', 10, 'linestyle', '-',  'linewidth',2) ;
+h(3) = plot( -2:2, mouse_waterreward_STS,                          'color', [0 0.5 0],   'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
+h(4) = plot( -2:2, mouse_watererror_STS,                           'color', 'r',         'marker', 'o',                               'markersize', 10, 'linestyle', '--', 'linewidth',2) ;
 MLabel{1} = 'Mouse - DA reward';
 MLabel{2} = 'DA Error';
 MLabel{3} = 'Water reward';
