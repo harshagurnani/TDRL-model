@@ -368,7 +368,7 @@ for blockID = blocks
       c=c+1;
    end
 
-   plot_contrast = includeContrast(:, b )==1;
+   plot_contrast = includeContrast(:, 2+b )==1;
    
    % PLOT only block 4, or block 3 if no block 4 present
    if blockID == mB
