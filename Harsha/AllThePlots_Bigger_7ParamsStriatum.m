@@ -76,7 +76,7 @@ full = figure;
 
 %% -------- (Left) Psychometric curves of blocks 1 and 2 ----------------%
 subplot(nrows, 2, 1 ); hold on;
-blocks = [ 1 2];
+blocks = [ 1 2 3 4];
 b=0;
 h = zeros(length(blocks)+2,1);
 per_mice = nan(1, length(contrasts) );
@@ -172,10 +172,10 @@ text(0,0.9,descr1)
 descr2 = {'Model parameter values:';
    ['alpha = ',num2str(xanswerMin(1,1))];
    ['DAval = ',num2str(xanswerMin(1,2))];
-   ['noiseSTD = ',num2str(xanswerMin(1,3))];
+   ['Sensory noise \sigma = ',num2str(xanswerMin(1,3))];
    ['Bias in QValue = ',num2str(xanswerMin(1,4))];
-   ['LambdaL = ',num2str(xanswerMin(1,5))];
-   ['LambdaR = ',num2str(xanswerMin(1,6))];
+   ['Lapse left \lambda_L = ',num2str(xanswerMin(1,5))];
+   ['Lapse right \lambda_R = ',num2str(xanswerMin(1,6))];
    ['DA persistence = ',num2str(xanswerMin(1,7)), ' trials'];};
 text(.55,0.9,descr2)
 
@@ -189,15 +189,28 @@ subplot(nrows,1,2,'Parent',full);  hold on
 
 plotLen = nTrials;
 mouse   = data_mice(:,3) ;
-model   = data_model(:,22);
+% % model   = data_model(:,22);
+% 
+% bestrun = find(PMatch(:,1)==max(PMatch(:,1)),1);
+% model = action(:,bestrun);
+allmodel = 0.96*action + 0.02;
+for jj=1:size(allmodel,2)
+    allmodel(:,jj) = smooth(allmodel(:,jj),15);
+end
+modelhigh = prctile(allmodel,95,2);%(max(allmodel'))';
+modellow = prctile(allmodel,5,2);%(min(allmodel'))';
+
+stimulus = (data_mice(:,2)>0);
 
 % Y Lim of choices put between 0.02 and 0.98
 smoothmouse = mouse*0.96 + 0.02;
 smoothmodel = model*0.96 + 0.02;
+smoothstim = stimulus*0.96 + 0.02;
 
 % Smoothed over 15 trials
 smoothmouse = smooth(smoothmouse,15);
 smoothmodel = smooth(smoothmodel,15);
+smoothstim = smooth(smoothstim, 15);
 
 
 blockID = data_mice(:,8);
@@ -220,8 +233,11 @@ plot( find(blockID==3),-0.03, 'marker', 's', 'markeredgecolor', 'g', 'markerface
 end
 
 % Plot smoothed P(R)
-plot(smoothmouse,'color',mouse_color)
-plot(smoothmodel,'color',model_color)
+tr(1)=fillplot( 1:size(allmodel,1), modellow, modelhigh, [0.5 0 0.5], 0.2 );%plot(smoothmodel,'color',model_color);
+tr(2)=plot(smoothmouse,'color',mouse_color);
+tr(3)=plot(smoothstim, 'color', [0 0.5 0]);
+legend(tr, 'Model', 'Mouse', 'Stimulus');
+
 
 
 ylim([-0.05 1.05])

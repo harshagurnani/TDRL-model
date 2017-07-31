@@ -1,4 +1,4 @@
- function AllThePlots_Bigger_WithLapse(Data, data_modelAll, actionAll, correctAll, xanswerMin, includeContrast, NLLData, varargin)
+ function AllThePlots_Bigger_7Params_IdenticalBelief(Data, data_modelAll, actionAll, correctAll, xanswerMin, includeContrast, NLLData, varargin)
 
  % 1 - (Left) Psychometric curves of blocks 1 and 2. (Middle) Percent match for top 5 models (Right) Details of parameters fit
  % 2 -  Model and experimental P(R) sliding over all sessions
@@ -39,13 +39,13 @@ color=[0 0 1; 1 0 0; 0 1 0; 0 0 0];   % blue, red, green, black
 markerShape = {'o', 's', '^', 'v'};
 BlockLabels = {'DA-L', 'DA-R','DA-Both', 'No DA'}; 
 
-if any(data_mice(:,8)>2)
-% Block 3/4 present
-    nrows = 5;
-else
-    nrows = 4;
-end
-
+% if any(data_mice(:,8)>2)
+% % Block 3/4 present
+%     nrows = 5;
+% else
+%     nrows = 4;
+% end
+nrows = 4;
 contrasts = unique(data_mice(:,2))';
 if nargin<8    
     AllBlocks = unique(data_mice(:,8))';
@@ -62,11 +62,11 @@ noiseSTD    = NLLData.noiseSTD;
 Qbias       = NLLData.Qbias;
 lambdaL     = NLLData.lambdaL;
 lambdaR     = NLLData.lambdaR;
-
-
-alpha2      = NLLData.alpha2;
-FvalStore2  = NLLData.FvalStore2;
-params2     = NLLData.top5params;
+beta        = NLLData.beta;
+% 
+% alpha2      = NLLData.alpha2;
+% FvalStore2  = NLLData.FvalStore2;
+% params2     = NLLData.top5params;
 
 full = figure;
 
@@ -76,7 +76,7 @@ full = figure;
 
 %% -------- (Left) Psychometric curves of blocks 1 and 2 ----------------%
 subplot(nrows, 2, 1 ); hold on;
-blocks = unique(data_mice(:,8))';
+blocks = [ 1 2];
 b=0;
 h = zeros(length(blocks)+2,1);
 per_mice = nan(1, length(contrasts) );
@@ -173,6 +173,7 @@ descr2 = {'Model parameter values:';
    ['alpha = ',num2str(xanswerMin(1,1))];
    ['DAval = ',num2str(xanswerMin(1,2))];
    ['noiseSTD = ',num2str(xanswerMin(1,3))];
+   ['Beta = ',num2str(xanswerMin(1,7)),];
    ['Bias in QValue = ',num2str(xanswerMin(1,4))];
    ['LambdaL = ',num2str(xanswerMin(1,5))];
    ['LambdaR = ',num2str(xanswerMin(1,6))];};
@@ -188,25 +189,18 @@ subplot(nrows,1,2,'Parent',full);  hold on
 
 plotLen = nTrials;
 mouse   = data_mice(:,3) ;
-model   = data_model(:,22);
-allmodel = 0.96*action + 0.02;
-for jj=1:size(allmodel,2)
-    allmodel(:,jj) = smooth(allmodel(:,jj),15);
-end
-modelhigh = prctile(allmodel,95,2);%(max(allmodel'))';
-modellow = prctile(allmodel,5,2);%(min(allmodel'))';
+% model   = data_model(:,22);
 
-stimulus = (data_mice(:,2)>0);
-
+bestrun = find(PMatch(:,1)==max(PMatch(:,1)),1);
+model = action(:,bestrun);
 % Y Lim of choices put between 0.02 and 0.98
 smoothmouse = mouse*0.96 + 0.02;
 smoothmodel = model*0.96 + 0.02;
-smoothstim = stimulus*0.96 + 0.02;
 
 % Smoothed over 15 trials
 smoothmouse = smooth(smoothmouse,15);
 smoothmodel = smooth(smoothmodel,15);
-smoothstim = smooth(smoothstim, 15);
+
 
 blockID = data_mice(:,8);
 mouse_color = 'k';
@@ -227,14 +221,10 @@ if any(blockID==3)
 plot( find(blockID==3),-0.03, 'marker', 's', 'markeredgecolor', 'g', 'markerfacecolor', 'g','linestyle', 'none' ,'markersize',2);
 end
 
-tr=zeros(3,1);
 % Plot smoothed P(R)
+plot(smoothmouse,'color',mouse_color)
+plot(smoothmodel,'color',model_color)
 
-% tr(2)=plot(smoothmodel,'color',model_color);
-tr(1)=fillplot( 1:size(allmodel,1), modellow, modelhigh, [0.5 0 0.5], 0.2 );%plot(smoothmodel,'color',model_color);
-tr(2)=plot(smoothmouse,'color',mouse_color);
-tr(3)=plot(smoothstim, 'color', [0 0.5 0]);
-legend(tr, 'Model', 'Mouse', 'Stimulus');
 
 ylim([-0.05 1.05])
 xlim([0 plotLen])
@@ -251,7 +241,7 @@ set(gca,'visible','on');
 subplot(nrows,1,3)
 title('NLL of Psychometric curves')
 [~,locMin] = min(FvalStore(:));
-[a,b,~,d,e,f] = ind2sub(size(FvalStore),locMin);
+[a,b,~,d,e,f,g] = ind2sub(size(FvalStore),locMin);
 
 %% ------------- (Left) Alpha v/s Noise ------------------%
 clear colourVal x y
@@ -266,7 +256,7 @@ for j=1:length(noiseSTD)
       % Prepare variables for colour map
       x = noiseSTD; %[min(noiseSTD),max(noiseSTD)];
       y = alpha;    %[min(alpha),max(alpha)];
-      colourVal(i,j) = FvalStore(i,b,j,d,e,f);
+      colourVal(i,j) = FvalStore(i,b,j,d,e,f,g);
       
    end
 end
@@ -290,7 +280,7 @@ for j=1:length(noiseSTD)
       % Prepare variables for colour map
       x = noiseSTD; %[min(noiseSTD),max(noiseSTD)];
       y = DAval;    %[min(DAval),max(DAval)];
-      colourVal(i,j) = FvalStore(a,i,j,d,e,f);
+      colourVal(i,j) = FvalStore(a,i,j,d,e,f,g);
       
    end
 end
@@ -315,7 +305,7 @@ for j=1:length(noiseSTD)
       % Prepare variables for colour map
       x = noiseSTD; %[min(noiseSTD),max(noiseSTD)];
       y = Qbias;    %[min(Qbias),max(Qbias)];
-      colourVal(i,j) = FvalStore(a,b,j,i,e,f);
+      colourVal(i,j) = FvalStore(a,b,j,i,e,f,g);
       
    end
 end
@@ -327,127 +317,127 @@ colorbar
 xlabel(xData)
 ylabel(yData)
 
-%-------------------------------------------------------------------------%
-%% (Conditional) PLOT 4 - Conditional choices (For Blocks 3/4 if PRESENT)
-%-------------------------------------------------------------------------%
-if any(data_mice(:,8)>2)
-%-- (Left) Conditional Psychometric curves after Left and Right choices
-   subplot( nrows, 2, 7); hold on;
-
-   % Block 3/4 present
-   blocks = unique(data_mice(data_mice(:,8)>2,8))'; 
-   mB = 5;
-   if ~isempty(blocks)
-       mB = max(blocks);
-   end
-
-per_mice = nan(1, length(contrasts) );
-per_model = per_mice;
-
-% h = zeros(2*length(blocks)+2,1);
-h = zeros(2+2,1);
-b=0;
-color_b={'cyan','cyan'};
-color_r = {'m','m'};
-% hLabel = cell(2*length(blocks),1);
-hLabel = cell(2,1);
-for blockID = blocks
-   b=b+1;
-   c=1;
-   for istim = contrasts
-      
-      id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
-          data_mice(1:end-1,3)==0 & data_mice(1:end-1,10)==1];
-      per_mice(1,c)= nanmean(data_mice(id,3)) ;
-      id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
-          data_mice(1:end-1,3)==1 & data_mice(1:end-1,10)==1];
-      per_mice(2,c)= nanmean(data_mice(id,3)) ;
-      
-      
-      per_model(1,c)=0;
-      per_model(2,c)=0;
-      
-      for iter = 1:nIters
-          id =[false;data_model(2:end,2)==istim & data_model(2:end,8)==blockID & ...
-             action(1:end-1,iter)==0 & correct(1:end-1,iter)==1];
-          per_model(1,c)= per_model(1,c) + nanmean(action( id,iter)) ;
-          id = [false; data_model(2:end,2)==istim & data_model(2:end,8)==blockID & ...
-             action(1:end-1,iter)==1 & correct(1:end-1,iter)==1];
-          per_model(2,c)= per_model(2,c) + nanmean(action( id,iter)) ;
-      end
-      per_model(1,c)=per_model(1,c)/nIters;
-      per_model(2,c)=per_model(2,c)/nIters;
-      
-      c=c+1;
-   end
-
-   plot_contrast = includeContrast(:, 2+b )==1;
-   
-   % PLOT only block 4, or block 3 if no block 4 present
-   if blockID == mB
-       
-       % plot mouse
-       plot(contrasts(plot_contrast),per_mice(1,plot_contrast),...
-          'color',color_b{b},...
-          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
-          'markerfacecolor',color_b{b},'linestyle','-',...
-          'linewidth',1.2);
-       plot(contrasts(plot_contrast),per_mice(2,plot_contrast),...
-          'color',color_r{b},...
-          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
-          'markerfacecolor',color_r{b},'linestyle','-',...
-          'linewidth',1.2);
-
-
-       % plot the model
-       plot(contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
-          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
-          'linestyle','--','linewidth',1.2);
-       plot(contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
-          'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
-          'linestyle','--','linewidth',1.2);
-
-       ylabel('Fraction\newlinerightward choice')
-       xlabel('Contrast')
-       h( 1 ) = plot(NaN,NaN,'color',color_b{b},'marker',markerShape{blockID},'markersize',10,...
-       'markerfacecolor',color_b{b},'markerfacecolor',color_b{b},'linestyle','-');
-       h( 2 ) = plot(NaN,NaN,'color',color_r{b},'marker',markerShape{blockID},'markersize',10,...
-       'markerfacecolor',color_r{b},'markerfacecolor',color_r{b},'linestyle','-');
-
-       hLabel{1} = strcat( 'After Left - ', BlockLabels{blockID});
-       hLabel{2}   = strcat( 'After Right - ', BlockLabels{blockID});
-   end
-end
-
-   %b = 2*length(blocks);
-   
- 
-   h(3) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);    
-   h(4) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
-
-   legend(h, hLabel{:}, 'Mouse','Model','Location','southeast');
+% %-------------------------------------------------------------------------%
+% %% (Conditional) PLOT 4 - Conditional choices (For Blocks 3/4 if PRESENT)
+% %-------------------------------------------------------------------------%
+% if any(data_mice(:,8)>2)
+% %-- (Left) Conditional Psychometric curves after Left and Right choices
+%    subplot( nrows, 2, 7); hold on;
+% 
+%    % Block 3/4 present
+%    blocks = unique(data_mice(data_mice(:,8)>2,8))'; 
+%    mB = 5;
+%    if ~isempty(blocks)
+%        mB = max(blocks);
+%    end
+% 
+% per_mice = nan(1, length(contrasts) );
+% per_model = per_mice;
+% 
+% % h = zeros(2*length(blocks)+2,1);
+% h = zeros(2+2,1);
+% b=0;
+% color_b={'cyan','cyan'};
+% color_r = {'m','m'};
+% % hLabel = cell(2*length(blocks),1);
+% hLabel = cell(2,1);
+% for blockID = blocks
+%    b=b+1;
+%    c=1;
+%    for istim = contrasts
+%       
+%       id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
+%           data_mice(1:end-1,3)==0 & data_mice(1:end-1,10)==1];
+%       per_mice(1,c)= nanmean(data_mice(id,3)) ;
+%       id=[false;data_mice(2:end,2)==istim & data_mice(2:end,8)==blockID & ...
+%           data_mice(1:end-1,3)==1 & data_mice(1:end-1,10)==1];
+%       per_mice(2,c)= nanmean(data_mice(id,3)) ;
+%       
+%       
+%       per_model(1,c)=0;
+%       per_model(2,c)=0;
+%       
+%       for iter = 1:nIters
+%           id =[false;data_model(2:end,2)==istim & data_model(2:end,8)==blockID & ...
+%              action(1:end-1,iter)==0 & correct(1:end-1,iter)==1];
+%           per_model(1,c)= per_model(1,c) + nanmean(action( id,iter)) ;
+%           id = [false; data_model(2:end,2)==istim & data_model(2:end,8)==blockID & ...
+%              action(1:end-1,iter)==1 & correct(1:end-1,iter)==1];
+%           per_model(2,c)= per_model(2,c) + nanmean(action( id,iter)) ;
+%       end
+%       per_model(1,c)=per_model(1,c)/nIters;
+%       per_model(2,c)=per_model(2,c)/nIters;
+%       
+%       c=c+1;
+%    end
+% 
+%    plot_contrast = includeContrast(:, b )==1;
+%    
+%    % PLOT only block 4, or block 3 if no block 4 present
+%    if blockID == mB
+%        
+%        % plot mouse
+%        plot(contrasts(plot_contrast),per_mice(1,plot_contrast),...
+%           'color',color_b{b},...
+%           'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+%           'markerfacecolor',color_b{b},'linestyle','-',...
+%           'linewidth',1.2);
+%        plot(contrasts(plot_contrast),per_mice(2,plot_contrast),...
+%           'color',color_r{b},...
+%           'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+%           'markerfacecolor',color_r{b},'linestyle','-',...
+%           'linewidth',1.2);
+% 
+% 
+%        % plot the model
+%        plot(contrasts(plot_contrast),per_model(1,plot_contrast),'color',color_b{b},...
+%           'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_b{b},...
+%           'linestyle','--','linewidth',1.2);
+%        plot(contrasts(plot_contrast),per_model(2,plot_contrast),'color',color_r{b},...
+%           'marker',markerShape{blockID},'markersize',10,'markeredgecolor',color_r{b},...
+%           'linestyle','--','linewidth',1.2);
+% 
+%        ylabel('Fraction\newlinerightward choice')
+%        xlabel('Contrast')
+%        h( 1 ) = plot(NaN,NaN,'color',color_b{b},'marker',markerShape{blockID},'markersize',10,...
+%        'markerfacecolor',color_b{b},'markerfacecolor',color_b{b},'linestyle','-');
+%        h( 2 ) = plot(NaN,NaN,'color',color_r{b},'marker',markerShape{blockID},'markersize',10,...
+%        'markerfacecolor',color_r{b},'markerfacecolor',color_r{b},'linestyle','-');
+% 
+%        hLabel{1} = strcat( 'After Left - ', BlockLabels{blockID});
+%        hLabel{2}   = strcat( 'After Right - ', BlockLabels{blockID});
+%    end
 % end
-
-
-%% -- (Right) NLL of conditional PC as a function of alpha
-subplot( nrows, 2, 8); hold on;
-% plotDA = params2(:,2);
-% imagesc( plotDA, alpha2, FvalStore2 );
-
-
-x = params2(:,2)'; 
-y = alpha2; 
-xData = 'DA value of model';
-yData = 'Alpha';
-
-% plot the colour map
-imagesc(x,y,FvalStore2);
-colorbar
-xlabel(xData)
-ylabel(yData)
-title(' NLL of conditional PC for top 5 models (Columns)');
-end
-
+% 
+%    %b = 2*length(blocks);
+%    
+%  
+%    h(3) = plot(NaN,NaN,'color','k','linestyle','-','linewidth',1.2);    
+%    h(4) = plot(NaN,NaN,'color','k','linestyle','--','linewidth',1.2);
+% 
+%    legend(h, hLabel{:}, 'Mouse','Model','Location','southeast');
+% % end
+% 
+% 
+% %% -- (Right) NLL of conditional PC as a function of alpha
+% subplot( nrows, 2, 8); hold on;
+% % plotDA = params2(:,2);
+% % imagesc( plotDA, alpha2, FvalStore2 );
+% 
+% 
+% x = params2(:,2)'; 
+% y = alpha2; 
+% xData = 'DA value of model';
+% yData = 'Alpha';
+% 
+% % plot the colour map
+% imagesc(x,y,FvalStore2);
+% colorbar
+% xlabel(xData)
+% ylabel(yData)
+% title(' NLL of conditional PC for top 5 models (Columns)');
+% end
+% 
 
 %-------------------------------------------------------------------------%
 %% PLOT 5 - Performance of top models  
