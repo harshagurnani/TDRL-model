@@ -34,7 +34,9 @@ for model=1:nIndModels
     tmp = sort(FvalStore(:),'ascend');
     for jj=1:nanswers
     FMin1 = tmp(jj);
-    xanswerMin(jj,:, model) = xanswerStore(FvalStore == FMin1,:, model);
+    minindx = find(FvalStore == FMin1);
+    minindx = minindx(1 +floor( rand*(length(minindx)-1) )  );
+    xanswerMin(jj,:, model) = xanswerStore(minindx,:, model);
     end
 % FMin2 = tmp(2);
 % locMin2 = find(FvalStore == FMin2);
