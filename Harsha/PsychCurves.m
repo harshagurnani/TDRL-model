@@ -7,6 +7,21 @@ function [ contrasts, PC] = PsychCurves( TStimuli, TBlocks, action, varargin )
     contrasts = unique(TStimuli)';
     blocks = unique( TBlocks)';
     
+    trialsPerContrast = nan(length(contrasts)*length(blocks),1);
+    includeContrast = ones(size(trialsPerContrast));
+
+
+    c=1;
+    for b= blocks 
+      for ii= contrasts
+        trialsPerContrast(c) = length(TStimuli==ii & TBlocks==b);
+        if trialsPerContrast(c) < 0.05*length(TBlocks(TBlocks==b))
+          includeContrast(c) = 0;
+        end
+        c=c+1;
+      end
+    end
+    includeContrast = reshape( includeContrast, length(contrasts), length(blocks) );
     
     if nargin>3
         toplot = varargin{1};
@@ -61,7 +76,7 @@ function [ contrasts, PC] = PsychCurves( TStimuli, TBlocks, action, varargin )
        b=0; h = zeros(length(blocks),1);
        for blockID=blocks
            b=b+1;
-           h(b) = plot( contrasts(IC(:,b)==1), PC(IC(:,b)==1, b), 'Color', BlockColor{blockID}, 'marker', MarkerShape{blockID}, 'markerfacecolor', BlockColor{blockID}, 'markersize', 10 , 'linestyle', lst);
+           h(b) = plot( contrasts(includeContrast(:,b)==1), PC(includeContrast(:,b)==1, b), 'Color', BlockColor{blockID}, 'marker', MarkerShape{blockID}, 'markerfacecolor', BlockColor{blockID}, 'markersize', 10 , 'linestyle', lst);
        end
        if newfig
            legend(h, BlockLabel{blocks}, 'Location', 'SouthEast' ) 
